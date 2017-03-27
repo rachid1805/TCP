@@ -3,7 +3,7 @@
 namespace Common
 {
   [Serializable]
-  public class Profil
+  public class Profil : IData
   {
     private readonly string _user;
     private readonly string _password;

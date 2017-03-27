@@ -6,7 +6,7 @@ using System.Text;
 namespace Common
 {
   [Serializable]
-  public class ConnectionStatus
+  public class ConnectionStatus : IData
   {
     private readonly IDictionary<string, bool> _clientsStatus;
 
