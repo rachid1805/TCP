@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.IO;
 using System.ComponentModel;
 using System.Windows.Forms;
+using Common;
 
 namespace Client
 {
