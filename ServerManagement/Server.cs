@@ -19,7 +19,7 @@ namespace ServerManagement
     private readonly IPEndPoint _localEndPoint;
     private Socket _listenerSocket;
 
-    #region Contsructors
+    #region Contsructor
 
     public Server(string hostNameOrAddress, int port)
     {
@@ -62,16 +62,23 @@ namespace ServerManagement
         // Start listening for connections.  
         while (true)
         {
-          Console.WriteLine("Waiting for a connection...");
+          Console.WriteLine("Waiting for a new connection...");
           // Program is suspended while waiting for an incoming connection.  
           Socket handler = _listenerSocket.Accept();
 
           // An incoming connection needs to be processed.
-          bytes = new byte[1024];
+          bytes = new byte[8192];
           int bytesRec = handler.Receive(bytes);
-          Profil client = (Profil)Serializer.Deserialize(bytes);
+          var cmd = (Command)Serializer.Deserialize(bytes);
 
-          _connectionManager.AddNewConnection(client, handler);
+          switch (cmd.CommandType)
+          {
+            case CommandType.ClientLoginInform:
+              var profil = (Profil) cmd.Data;
+              _connectionManager.AddNewConnection(profil, handler);
+              Console.WriteLine("New connected client {0}", profil.UserName);
+              break;
+          }
 
           //handler.Send(msg);
           //handler.Shutdown(SocketShutdown.Both);

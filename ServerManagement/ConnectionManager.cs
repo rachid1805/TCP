@@ -59,7 +59,7 @@ namespace ServerManagement
         }
       }
 
-      socket.Send(msg);
+      //socket.Send(msg);
     }
 
     private void SynchronizeClients()
@@ -95,7 +95,7 @@ namespace ServerManagement
             {
               try
               {
-                _openedConnections[clientId].Send(stream);
+                //_openedConnections[clientId].Send(stream);
               }
               catch (SocketException e)
               {
