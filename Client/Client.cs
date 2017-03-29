@@ -16,10 +16,11 @@ namespace Client
   public class Client
   {
     private Socket _clientSocket;
-    private NetworkStream _networkStream;
+    //private NetworkStream _networkStream;
     private BackgroundWorker _bwReceiver;
     private IPEndPoint _serverEP;
-    private string _networkName;
+    private string _userName;
+    private string _password;
 
     #region Contsructors
 
@@ -31,7 +32,7 @@ namespace Client
     public Client(IPEndPoint server, string netName)
     {
       _serverEP = server;
-      _networkName = netName;
+      _userName = netName;
       System.Net.NetworkInformation.NetworkChange.NetworkAvailabilityChanged += new System.Net.NetworkInformation.NetworkAvailabilityChangedEventHandler(NetworkChange_NetworkAvailabilityChanged);
     }
 
@@ -44,7 +45,7 @@ namespace Client
     public Client(IPAddress serverIP, int port, string netName)
     {
       _serverEP = new IPEndPoint(serverIP, port);
-      _networkName = netName;
+      _userName = netName;
       System.Net.NetworkInformation.NetworkChange.NetworkAvailabilityChanged += new System.Net.NetworkInformation.NetworkAvailabilityChangedEventHandler(NetworkChange_NetworkAvailabilityChanged);
     }
 
@@ -122,10 +123,16 @@ namespace Client
     /// <summary>
     /// [Gets/Sets] The string that will sent to the server and then to other clients, to identify this client to them.
     /// </summary>
-    public string NetworkName
+    public string UserName
     {
-      get { return _networkName; }
-      set { _networkName = value; }
+      get { return _userName; }
+      set { _userName = value; }
+    }
+
+    public string Password
+    {
+      get { return _password; }
+      set { _password = value; }
     }
 
     #endregion
@@ -145,76 +152,85 @@ namespace Client
 
     private void StartReceive(object sender , DoWorkEventArgs e)
     {
-      while ( _clientSocket.Connected )
+      while (_clientSocket.Connected)
       {
-        //Read the command's Type.
-        byte [] buffer = new byte [4];
-        int readBytes = _networkStream.Read(buffer , 0 , 4);
-        if ( readBytes == 0 )
+        // Read the command object.
+        var bytes = new byte[4096];
+        var readBytes = _clientSocket.Receive(bytes);
+        if (readBytes == 0)
           break;
-        CommandType cmdType = (CommandType)( BitConverter.ToInt32(buffer , 0) );
+        Command cmd = (Command)Serializer.Deserialize(bytes);
 
-        //Read the command's sender ip size.
-        buffer = new byte [4];
-        readBytes = _networkStream.Read(buffer , 0 , 4);
-        if ( readBytes == 0 )
-          break;
-        int senderIPSize = BitConverter.ToInt32(buffer , 0);
+        //// Read the command's Type.
+        //var bytes = new byte[4096];
+        //var readBytes = _clientSocket.Receive(bytes);
+        //if ( readBytes == 0 )
+        //  break;
+        //Command command = (Command) Serializer.Deserialize(bytes);
 
-        //Read the command's sender ip.
-        buffer = new byte [senderIPSize];
-        readBytes = _networkStream.Read(buffer , 0 , senderIPSize);
-        if ( readBytes == 0 )
-          break;
-        IPAddress senderIP = IPAddress.Parse(System.Text.Encoding.ASCII.GetString(buffer));
+        //CommandType cmdType = (CommandType)( BitConverter.ToInt32(buffer , 0) );
 
-        //Read the command's sender name size.
-        buffer = new byte [4];
-        readBytes = _networkStream.Read(buffer , 0 , 4);
-        if ( readBytes == 0 )
-          break;
-        int senderNameSize = BitConverter.ToInt32(buffer , 0);
+        ////Read the command's sender ip size.
+        //buffer = new byte [4];
+        //readBytes = _networkStream.Read(buffer , 0 , 4);
+        //if ( readBytes == 0 )
+        //  break;
+        //int senderIPSize = BitConverter.ToInt32(buffer , 0);
 
-        //Read the command's sender name.
-        buffer = new byte [senderNameSize];
-        readBytes = _networkStream.Read(buffer , 0 , senderNameSize);
-        if ( readBytes == 0 )
-          break;
-        string senderName = System.Text.Encoding.Unicode.GetString(buffer);
+        ////Read the command's sender ip.
+        //buffer = new byte [senderIPSize];
+        //readBytes = _networkStream.Read(buffer , 0 , senderIPSize);
+        //if ( readBytes == 0 )
+        //  break;
+        //IPAddress senderIP = IPAddress.Parse(System.Text.Encoding.ASCII.GetString(buffer));
 
-        //Read the command's target size.
-        string cmdTarget = "";
-        buffer = new byte [4];
-        readBytes = _networkStream.Read(buffer , 0 , 4);
-        if ( readBytes == 0 )
-          break;
-        int ipSize = BitConverter.ToInt32(buffer , 0);
+        ////Read the command's sender name size.
+        //buffer = new byte [4];
+        //readBytes = _networkStream.Read(buffer , 0 , 4);
+        //if ( readBytes == 0 )
+        //  break;
+        //int senderNameSize = BitConverter.ToInt32(buffer , 0);
 
-        //Read the command's target.
-        buffer = new byte [ipSize];
-        readBytes = _networkStream.Read(buffer , 0 , ipSize);
-        if ( readBytes == 0 )
-          break;
-        cmdTarget = System.Text.Encoding.ASCII.GetString(buffer);
+        ////Read the command's sender name.
+        //buffer = new byte [senderNameSize];
+        //readBytes = _networkStream.Read(buffer , 0 , senderNameSize);
+        //if ( readBytes == 0 )
+        //  break;
+        //string senderName = System.Text.Encoding.Unicode.GetString(buffer);
 
-        //Read the command's MetaData size.
-        string cmdMetaData = "";
-        buffer = new byte [4];
-        readBytes = _networkStream.Read(buffer , 0 , 4);
-        if ( readBytes == 0 )
-          break;
-        int metaDataSize = BitConverter.ToInt32(buffer , 0);
+        ////Read the command's target size.
+        //string cmdTarget = "";
+        //buffer = new byte [4];
+        //readBytes = _networkStream.Read(buffer , 0 , 4);
+        //if ( readBytes == 0 )
+        //  break;
+        //int ipSize = BitConverter.ToInt32(buffer , 0);
 
-        //Read the command's Meta data.
-        buffer = new byte [metaDataSize];
-        readBytes = _networkStream.Read(buffer , 0 , metaDataSize);
-        if ( readBytes == 0 )
-          break;
-        cmdMetaData = System.Text.Encoding.Unicode.GetString(buffer);
+        ////Read the command's target.
+        //buffer = new byte [ipSize];
+        //readBytes = _networkStream.Read(buffer , 0 , ipSize);
+        //if ( readBytes == 0 )
+        //  break;
+        //cmdTarget = System.Text.Encoding.ASCII.GetString(buffer);
+
+        ////Read the command's MetaData size.
+        //string cmdMetaData = "";
+        //buffer = new byte [4];
+        //readBytes = _networkStream.Read(buffer , 0 , 4);
+        //if ( readBytes == 0 )
+        //  break;
+        //int metaDataSize = BitConverter.ToInt32(buffer , 0);
+
+        ////Read the command's Meta data.
+        //buffer = new byte [metaDataSize];
+        //readBytes = _networkStream.Read(buffer , 0 , metaDataSize);
+        //if ( readBytes == 0 )
+        //  break;
+        //cmdMetaData = System.Text.Encoding.Unicode.GetString(buffer);
                 
-        Command cmd = new Command(cmdType , IPAddress.Parse(cmdTarget) , cmdMetaData);
-        cmd.SenderIP = senderIP;
-        cmd.SenderName = senderName;
+        //Command cmd = new Command(cmdType , IPAddress.Parse(cmdTarget) , cmdMetaData);
+        //cmd.SenderIP = senderIP;
+        //cmd.SenderName = senderName;
         OnCommandReceived(new CommandEventArgs(cmd));
       }
       OnServerDisconnected(new ServerEventArgs(_clientSocket));
@@ -245,34 +261,38 @@ namespace Client
       try
       {
         semaphor.WaitOne();
-        if ( cmd.MetaData == null || cmd.MetaData == "" )
-          SetMetaDataIfIsNull(cmd);
-        //CommandType
-        byte [] buffer = new byte [4];
-        buffer = BitConverter.GetBytes((int)cmd.CommandType);
-        _networkStream.Write(buffer , 0 , 4);
-        _networkStream.Flush();
-        //Command Target
-        byte [] ipBuffer = Encoding.ASCII.GetBytes(cmd.Target.ToString());
-        buffer = new byte [4];
-        buffer = BitConverter.GetBytes(ipBuffer.Length);
-        _networkStream.Write(buffer , 0 , 4);
-        _networkStream.Flush();
-        _networkStream.Write(ipBuffer , 0 , ipBuffer.Length);
-        _networkStream.Flush();
-        //Command MetaData
-        byte [] metaBuffer = Encoding.Unicode.GetBytes(cmd.MetaData);
-        buffer = new byte [4];
-        buffer = BitConverter.GetBytes(metaBuffer.Length);
-        _networkStream.Write(buffer , 0 , 4);
-        _networkStream.Flush();
-        _networkStream.Write(metaBuffer , 0 , metaBuffer.Length);
-        _networkStream.Flush();
+
+        byte[] cmdBytes = Serializer.Serialize(cmd);
+        _clientSocket.Send(cmdBytes);
+
+        //if ( cmd.MetaData == null || cmd.MetaData == "" )
+        //  SetMetaDataIfIsNull(cmd);
+        ////CommandType
+        //byte [] buffer = new byte [4];
+        //buffer = BitConverter.GetBytes((int)cmd.CommandType);
+        //_networkStream.Write(buffer , 0 , 4);
+        //_networkStream.Flush();
+        ////Command Target
+        //byte [] ipBuffer = Encoding.ASCII.GetBytes(cmd.Target.ToString());
+        //buffer = new byte [4];
+        //buffer = BitConverter.GetBytes(ipBuffer.Length);
+        //_networkStream.Write(buffer , 0 , 4);
+        //_networkStream.Flush();
+        //_networkStream.Write(ipBuffer , 0 , ipBuffer.Length);
+        //_networkStream.Flush();
+        ////Command MetaData
+        //byte [] metaBuffer = Encoding.Unicode.GetBytes(cmd.MetaData);
+        //buffer = new byte [4];
+        //buffer = BitConverter.GetBytes(metaBuffer.Length);
+        //_networkStream.Write(buffer , 0 , 4);
+        //_networkStream.Flush();
+        //_networkStream.Write(metaBuffer , 0 , metaBuffer.Length);
+        //_networkStream.Flush();
 
         semaphor.Release();
         return true;
       }
-      catch
+      catch (Exception ex)
       {
         semaphor.Release();
         return false;
@@ -281,22 +301,22 @@ namespace Client
 
     private void SetMetaDataIfIsNull(Command cmd)
     {
-      switch ( cmd.CommandType )
-      {
-        case ( CommandType.ClientLoginInform ):
-          cmd.MetaData = IP.ToString() + ":" + _networkName;
-          break;
-        case ( CommandType.PCLockWithTimer ):
-        case ( CommandType.PCLogOFFWithTimer ):
-        case ( CommandType.PCRestartWithTimer ):
-        case ( CommandType.PCShutDownWithTimer ):
-        case ( CommandType.UserExitWithTimer ):
-          cmd.MetaData = "60000";
-          break;
-        default:
-          cmd.MetaData = "\n";
-          break;
-      }
+      //switch ( cmd.CommandType )
+      //{
+      //  case ( CommandType.ClientLoginInform ):
+      //    cmd.MetaData = IP.ToString() + ":" + _networkName;
+      //    break;
+      //  case ( CommandType.PCLockWithTimer ):
+      //  case ( CommandType.PCLogOFFWithTimer ):
+      //  case ( CommandType.PCRestartWithTimer ):
+      //  case ( CommandType.PCShutDownWithTimer ):
+      //  case ( CommandType.UserExitWithTimer ):
+      //    cmd.MetaData = "60000";
+      //    break;
+      //  default:
+      //    cmd.MetaData = "\n";
+      //    break;
+      //}
     }
  
     #endregion
@@ -331,15 +351,18 @@ namespace Client
         _clientSocket = new Socket(AddressFamily.InterNetwork , SocketType.Stream , ProtocolType.Tcp);
         _clientSocket.Connect(_serverEP);
         e.Result = true;
-        _networkStream = new NetworkStream(_clientSocket);
+        //_networkStream = new NetworkStream(_clientSocket);
         _bwReceiver = new BackgroundWorker();
         _bwReceiver.WorkerSupportsCancellation = true;
         _bwReceiver.DoWork += new DoWorkEventHandler(StartReceive);
         _bwReceiver.RunWorkerAsync();
-                
+
+        ////Inform to all clients that this client is now online.
+        //Command informToAllCMD = new Command(CommandType.ClientLoginInform , IPAddress.Broadcast , IP.ToString() + ":" + _networkName);
         //Inform to all clients that this client is now online.
-        Command informToAllCMD = new Command(CommandType.ClientLoginInform , IPAddress.Broadcast , IP.ToString() + ":" + _networkName);
-        SendCommand(informToAllCMD);
+        //Command cmd = new Command(CommandType.ClientLoginInform, IPAddress.Broadcast, IP.ToString() + ":" + _networkName);
+        Command cmd = new Command(CommandType.ClientLoginInform, new Profil(_userName, _password, true));
+        SendCommand(cmd);
       }
       catch
       {
