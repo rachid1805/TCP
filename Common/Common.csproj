@@ -49,8 +49,10 @@
     <Compile Include="Definitions.cs" />
     <Compile Include="EventArgs.cs" />
     <Compile Include="IData.cs" />
+    <Compile Include="MessageContainer.cs" />
     <Compile Include="Profil.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RoomContainer.cs" />
     <Compile Include="Serializer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
