@@ -33,7 +33,7 @@ namespace Server
       programDomain._listenerThread.DoWork += new DoWorkEventHandler(programDomain._server.StartListening);
       programDomain._listenerThread.RunWorkerAsync();
 
-      Console.WriteLine("*** Listening on port {0}:{2} started.Press ENTER to shutdown server. ***\n", programDomain._server.Ip.ToString(), ":", programDomain._server.Port.ToString());
+      Console.WriteLine("*** Listening on port {0}:{2} started. Press ENTER to shutdown server. ***\n", programDomain._server.Ip.ToString(), ":", programDomain._server.Port.ToString());
 
       Console.ReadLine();
 
