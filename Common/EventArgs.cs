@@ -5,7 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using Common;
 
-namespace Client
+namespace Common
 {
   /// <summary>
   /// Occurs when a command received from the server.
@@ -55,7 +55,7 @@ namespace Client
   /// </summary>
   /// <param name="sender">Sender.</param>
   /// <param name="e">The server information.</param>
-  public delegate void ServerDisconnectedEventHandler(object sender , ServerEventArgs e);
+  public delegate void ServerDisconnectedEventHandler(object sender, ServerEventArgs e);
   /// <summary>
   /// The class that contains information about the server.
   /// </summary>
@@ -87,13 +87,6 @@ namespace Client
   }
 
   /// <summary>
-  /// Occurs when this client disconnected from the server.
-  /// </summary>
-  /// <param name="sender">Sender.</param>
-  /// <param name="e">EventArgs.</param>
-  public delegate void DisconnectedEventHandler(object sender , EventArgs e);
-
-  /// <summary>
   /// Occurs when this client connected to the remote server Successfully.
   /// </summary>
   /// <param name="sender">Sender.</param>
@@ -120,4 +113,41 @@ namespace Client
   /// <param name="sender">Sender.</param>
   /// <param name="e">EventArgs.</param>
   public delegate void NetworkAlivedEventHandler(object sender , EventArgs e);
+
+  /// <summary>
+  /// Occurs when a remote client had been disconnected from the server.
+  /// </summary>
+  /// <param name="sender">Sender.</param>
+  /// <param name="e">The client information.</param>
+  public delegate void ClientDisconnectedEventHandler(object sender, ClientEventArgs e);
+
+  /// <summary>
+  /// Client event args.
+  /// </summary>
+  public class ClientEventArgs : EventArgs
+  {
+    private Socket _socket;
+    /// <summary>
+    /// The ip address of remote client.
+    /// </summary>
+    public IPAddress IP
+    {
+      get { return ((IPEndPoint)_socket.RemoteEndPoint).Address; }
+    }
+    /// <summary>
+    /// The port of remote client.
+    /// </summary>
+    public int Port
+    {
+      get { return ((IPEndPoint)_socket.RemoteEndPoint).Port; }
+    }
+    /// <summary>
+    /// Creates an instance of ClientEventArgs class.
+    /// </summary>
+    /// <param name="clientManagerSocket">The socket of server side socket that comunicates with the remote client.</param>
+    public ClientEventArgs(Socket clientManagerSocket)
+    {
+      _socket = clientManagerSocket;
+    }
+  }
 }

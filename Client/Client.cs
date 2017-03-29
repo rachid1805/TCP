@@ -137,7 +137,7 @@ namespace Client
       if ( !e.IsAvailable )
       {
         OnNetworkDead(new EventArgs());
-        OnDisconnectedFromServer(new EventArgs());
+        OnDisconnectedFromServer(new ClientEventArgs(_clientSocket));
       }
       else
         OnNetworkAlived(new EventArgs());
@@ -377,7 +377,7 @@ namespace Client
           _clientSocket.Shutdown(SocketShutdown.Both);
           _clientSocket.Close();
           _bwReceiver.CancelAsync();
-          OnDisconnectedFromServer(new EventArgs());
+          OnDisconnectedFromServer(new ClientEventArgs(_clientSocket));
           return true;
         }
         catch
@@ -475,12 +475,12 @@ namespace Client
     /// <summary>
     /// Occurs when this client disconnected from the remote server.
     /// </summary>
-    public event DisconnectedEventHandler DisconnectedFromServer;
+    public event ClientDisconnectedEventHandler DisconnectedFromServer;
     /// <summary>
     /// Occurs when this client disconnected from the remote server.
     /// </summary>
     /// <param name="e">EventArgs.</param>
-    protected virtual void OnDisconnectedFromServer(EventArgs e)
+    protected virtual void OnDisconnectedFromServer(ClientEventArgs e)
     {
       if ( DisconnectedFromServer != null )
       {
@@ -488,7 +488,7 @@ namespace Client
         if ( target != null && target.InvokeRequired )
           target.Invoke(DisconnectedFromServer , new object [] { this , e });
         else
-          DisconnectedFromServer(this , e);
+          DisconnectedFromServer(this, e);
       }
     }
 

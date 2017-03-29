@@ -5,6 +5,14 @@ using System.Text;
 namespace Common
 {
   /// <summary>
+  /// Shynchronization time in ms
+  /// </summary>
+  public enum Definitions
+  {
+    SYNCHRONIZATION_TIME = 15000
+  }
+
+  /// <summary>
   /// The type of commands that you can sent to the server.(Note : These are just some comman types.You should do the desired actions when a command received to the client yourself.)
   /// </summary>
   public enum CommandType

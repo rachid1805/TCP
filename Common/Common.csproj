@@ -46,7 +46,8 @@
   <ItemGroup>
     <Compile Include="Command.cs" />
     <Compile Include="ConnectionStatus.cs" />
-    <Compile Include="Enums.cs" />
+    <Compile Include="Definitions.cs" />
+    <Compile Include="EventArgs.cs" />
     <Compile Include="IData.cs" />
     <Compile Include="Profil.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

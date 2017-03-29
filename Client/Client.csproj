@@ -64,7 +64,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client.cs" />
-    <Compile Include="EventArgs.cs" />
     <Compile Include="PrivateFrm.cs">
       <SubType>Form</SubType>
     </Compile>
