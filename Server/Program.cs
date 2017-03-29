@@ -10,7 +10,7 @@ namespace Server
   class Program
   {
     private IList<ClientManager> _clients;
-    private Server _server;
+    private ServerManagement.Server _server;
     private BackgroundWorker _listenerThread;
 
     public static void Main(string[] args)
@@ -26,7 +26,7 @@ namespace Server
         port = int.Parse(args[1]);
       }
       Program programDomain = new Program();
-      programDomain._server = new Server(hostNameOrAddress, port);
+      programDomain._server = new ServerManagement.Server(hostNameOrAddress, port);
 
       programDomain._listenerThread = new BackgroundWorker();
       programDomain._listenerThread.WorkerSupportsCancellation = true;
