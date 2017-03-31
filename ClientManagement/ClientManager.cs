@@ -14,7 +14,7 @@ namespace ClientManagement
   /// <summary>
   /// The command client command class.
   /// </summary>
-  public class Client
+  public class ClientManager
   {
     private Socket _clientSocket;
     private readonly Semaphore _semaphore;
@@ -30,7 +30,7 @@ namespace ClientManagement
     /// </summary>
     /// <param name="server">The remote server to connect.</param>
     /// <param name="netName">The string that will send to the server and then to other clients, to identify this client to all clients.</param>
-    public Client(IPEndPoint server, string netName)
+    public ClientManager(IPEndPoint server, string netName)
     {
       _serverEP = server;
       _userName = netName;
@@ -44,7 +44,7 @@ namespace ClientManagement
     ///<param name="serverIP">The IP of remote server.</param>
     ///<param name="port">The port of remote server.</param>
     /// <param name="netName">The string that will send to the server and then to other clients, to identify this client to all clients.</param>
-    public Client(IPAddress serverIP, int port, string netName)
+    public ClientManager(IPAddress serverIP, int port, string netName)
     {
       _serverEP = new IPEndPoint(serverIP, port);
       _userName = netName;

@@ -39,7 +39,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClientManager.cs" />
+    <Compile Include="ClientController.cs" />
     <Compile Include="ConnectionManager.cs" />
     <Compile Include="IMessagesManager.cs" />
     <Compile Include="IUsersManager.cs" />

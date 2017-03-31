@@ -14,7 +14,7 @@ namespace ServerManagement
 {
   public class ServerManager
   {
-    private IList<ClientManager> _clients;
+    private IList<ClientController> _clients;
     private readonly IPEndPoint _localEndPoint;
     private Socket _listenerSocket;
 
@@ -22,7 +22,7 @@ namespace ServerManagement
 
     public ServerManager(string hostNameOrAddress, int port)
     {
-      _clients = new List<ClientManager>();
+      _clients = new List<ClientController>();
 
       // Establish the local endpoint for the socket
       IPHostEntry ipHostEntry = Dns.GetHostEntry(hostNameOrAddress);
@@ -75,7 +75,7 @@ namespace ServerManagement
 
     public void Close()
     {
-      foreach (ClientManager client in _clients)
+      foreach (ClientController client in _clients)
       {
         client.Disconnect();
       }
@@ -92,7 +92,7 @@ namespace ServerManagement
 
     private void CreateNewClientManager(Socket socket)
     {
-      ClientManager newClientManager = new ClientManager(socket);
+      ClientController newClientManager = new ClientController(socket);
       newClientManager.CommandReceived += new CommandReceivedEventHandler(CommandReceived);
       newClientManager.DisconnectedClient += new ClientDisconnectedEventHandler(ClientDisconnected);
       CheckForAbnormalDisconnection(newClientManager);
@@ -121,7 +121,7 @@ namespace ServerManagement
       }
     }
 
-    private void CheckForAbnormalDisconnection(ClientManager client)
+    private void CheckForAbnormalDisconnection(ClientController client)
     {
       if (RemoveClientManager(client.IP))
       {
@@ -154,7 +154,7 @@ namespace ServerManagement
     private int IndexOfClient(IPAddress ip)
     {
       int index = -1;
-      foreach (ClientManager client in _clients)
+      foreach (ClientController client in _clients)
       {
         index++;
         if (client.IP.Equals(ip))

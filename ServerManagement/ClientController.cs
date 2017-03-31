@@ -12,7 +12,7 @@ namespace ServerManagement
   /// <summary>
   /// The class that contains some methods and properties to manage the remote clients.
   /// </summary>
-  public class ClientManager
+  public class ClientController
   {
     private readonly Socket _socket;
     private string _clientName;
@@ -25,7 +25,7 @@ namespace ServerManagement
     /// Creates an instance of ClientManager class to comunicate with remote clients.
     /// </summary>
     /// <param name="clientSocket">The socket of ClientManager.</param>
-    public ClientManager(Socket clientSocket)
+    public ClientController(Socket clientSocket)
     {
       _socket = clientSocket;
       _semaphore = new Semaphore(1, 1);
