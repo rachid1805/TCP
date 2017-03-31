@@ -33,13 +33,14 @@ namespace Common
   /// </summary>
   public class CommandEventArgs : EventArgs
   {
-    private CommandContainer command;
+    private CommandContainer _command;
+
     /// <summary>
     /// The received command.
     /// </summary>
     public CommandContainer Command
     {
-      get { return command; }
+      get { return _command; }
     }
     /// <summary>
     /// Creates an instance of CommandEventArgs class.
@@ -47,7 +48,7 @@ namespace Common
     /// <param name="cmd">The received command.</param>
     public CommandEventArgs(CommandContainer cmd)
     {
-      command = cmd;
+      _command = cmd;
     }
   }
   /// <summary>
@@ -61,20 +62,20 @@ namespace Common
   /// </summary>
   public class ServerEventArgs : EventArgs
   {
-    private Socket socket;
+    private Socket _socket;
     /// <summary>
     /// The IP address of server.
     /// </summary>
     public IPAddress IP
     {
-      get { return ( (IPEndPoint)socket.RemoteEndPoint ).Address; }
+      get { return ( (IPEndPoint)_socket.RemoteEndPoint ).Address; }
     }
     /// <summary>
     /// The port of server.
     /// </summary>
     public int Port
     {
-      get { return ( (IPEndPoint)socket.RemoteEndPoint ).Port; }
+      get { return ( (IPEndPoint)_socket.RemoteEndPoint ).Port; }
     }
     /// <summary>
     /// Creates an instance of ServerEventArgs class.
@@ -82,7 +83,7 @@ namespace Common
     /// <param name="clientSocket">The client socket of current CommandClient instance.</param>
     public ServerEventArgs(Socket clientSocket)
     {
-      socket = clientSocket;
+      _socket = clientSocket;
     }
   }
 
@@ -127,6 +128,7 @@ namespace Common
   public class ClientEventArgs : EventArgs
   {
     private Socket _socket;
+
     /// <summary>
     /// The ip address of remote client.
     /// </summary>
