@@ -16,9 +16,8 @@ namespace ServerManagement
   {
     private Socket _socket;
     private string _clientName;
-    //private NetworkStream _networkStream;
     private BackgroundWorker _receiverThread;
-    private static Semaphore _semaphore = new Semaphore(1, 1);
+    private Semaphore _semaphore = new Semaphore(1, 1);
 
     #region Constructor
 
@@ -29,7 +28,6 @@ namespace ServerManagement
     public ClientManager(Socket clientSocket)
     {
       _socket = clientSocket;
-      //_networkStream = new NetworkStream(_socket);
       _receiverThread = new BackgroundWorker();
       _receiverThread.DoWork += new DoWorkEventHandler(StartReceive);
       _receiverThread.RunWorkerAsync();
@@ -93,73 +91,34 @@ namespace ServerManagement
       while (_socket.Connected)
       {
         // Read the command object.
-        var bytes = new byte[4096];
+        var bytes = new byte[8192];
         var readBytes = _socket.Receive(bytes);
         if (readBytes == 0)
           break;
         CommandContainer cmd = (CommandContainer)SerializerManager.Deserialize(bytes);
-
-        //// Read the command's Type.
-        //byte[] buffer = new byte[4];
-        //int readBytes = _networkStream.Read(buffer, 0, 4);
-        //if (readBytes == 0)
-        //  break;
-        //CommandType cmdType = (CommandType)(BitConverter.ToInt32(buffer, 0));
-
-        ////Read the command's target size.
-        //string cmdTarget = "";
-        //buffer = new byte[4];
-        //readBytes = _networkStream.Read(buffer, 0, 4);
-        //if (readBytes == 0)
-        //  break;
-        //int ipSize = BitConverter.ToInt32(buffer, 0);
-
-        ////Read the command's target.
-        //buffer = new byte[ipSize];
-        //readBytes = _networkStream.Read(buffer, 0, ipSize);
-        //if (readBytes == 0)
-        //  break;
-        //cmdTarget = System.Text.Encoding.ASCII.GetString(buffer);
-
-        ////Read the command's MetaData size.
-        //string cmdMetaData = "";
-        //buffer = new byte[4];
-        //readBytes = _networkStream.Read(buffer, 0, 4);
-        //if (readBytes == 0)
-        //  break;
-        //int metaDataSize = BitConverter.ToInt32(buffer, 0);
-
-        ////Read the command's Meta data.
-        //buffer = new byte[metaDataSize];
-        //readBytes = _networkStream.Read(buffer, 0, metaDataSize);
-        //if (readBytes == 0)
-        //  break;
-        //cmdMetaData = System.Text.Encoding.Unicode.GetString(buffer);
-
-        //Command cmd = new Command(cmdType, IPAddress.Parse(cmdTarget), cmdMetaData);
-        //cmd.SenderIP = IP;
-        //if (cmd.CommandType == CommandType.ClientLoginInform)
-        //  cmd.SenderName = cmd.MetaData.Split(new char[] { ':' })[1];
-        //else
-        //  cmd.SenderName = ClientName;
+        
         OnCommandReceived(new CommandEventArgs(cmd));
       }
       OnDisconnected(new ClientEventArgs(_socket));
       Disconnect();
     }
 
-    private void bwSender_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+    private void SenderThread_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
     {
-      if (!e.Cancelled && e.Error == null && ((bool)e.Result))
+      if (!e.Cancelled && e.Error == null && ((bool) e.Result))
+      {
         OnCommandSent(new EventArgs());
+      }
       else
+      {
         OnCommandFailed(new EventArgs());
+      }
 
       ((BackgroundWorker)sender).Dispose();
       GC.Collect();
     }
 
-    private void bwSender_DoWork(object sender, DoWorkEventArgs e)
+    private void SenderThread_DoWork(object sender, DoWorkEventArgs e)
     {
       CommandContainer cmd = (CommandContainer)e.Argument;
       e.Result = SendCommandToClient(cmd);
@@ -170,57 +129,12 @@ namespace ServerManagement
       try
       {
         _semaphore.WaitOne();
-
-        // Read the command object.
+        
         var bytes = SerializerManager.Serialize(cmd);
         _socket.Send(bytes);
 
-        ////Type
-        //byte[] buffer = new byte[4];
-        //buffer = BitConverter.GetBytes((int)cmd.CommandType);
-        //_networkStream.Write(buffer, 0, 4);
-        //_networkStream.Flush();
-
-        ////Sender IP
-        //byte[] senderIPBuffer = Encoding.ASCII.GetBytes(cmd.SenderIP.ToString());
-        //buffer = new byte[4];
-        //buffer = BitConverter.GetBytes(senderIPBuffer.Length);
-        //_networkStream.Write(buffer, 0, 4);
-        //_networkStream.Flush();
-        //_networkStream.Write(senderIPBuffer, 0, senderIPBuffer.Length);
-        //_networkStream.Flush();
-
-        ////Sender Name
-        //byte[] senderNameBuffer = Encoding.Unicode.GetBytes(cmd.SenderName.ToString());
-        //buffer = new byte[4];
-        //buffer = BitConverter.GetBytes(senderNameBuffer.Length);
-        //_networkStream.Write(buffer, 0, 4);
-        //_networkStream.Flush();
-        //_networkStream.Write(senderNameBuffer, 0, senderNameBuffer.Length);
-        //_networkStream.Flush();
-
-        ////Target
-        //byte[] ipBuffer = Encoding.ASCII.GetBytes(cmd.Target.ToString());
-        //buffer = new byte[4];
-        //buffer = BitConverter.GetBytes(ipBuffer.Length);
-        //_networkStream.Write(buffer, 0, 4);
-        //_networkStream.Flush();
-        //_networkStream.Write(ipBuffer, 0, ipBuffer.Length);
-        //_networkStream.Flush();
-
-        ////Meta Data.
-        //if (cmd.MetaData == null || cmd.MetaData == "")
-        //  cmd.MetaData = "\n";
-
-        //byte[] metaBuffer = Encoding.Unicode.GetBytes(cmd.MetaData);
-        //buffer = new byte[4];
-        //buffer = BitConverter.GetBytes(metaBuffer.Length);
-        //_networkStream.Write(buffer, 0, 4);
-        //_networkStream.Flush();
-        //_networkStream.Write(metaBuffer, 0, metaBuffer.Length);
-        //_networkStream.Flush();
-
         _semaphore.Release();
+
         return true;
       }
       catch
@@ -240,17 +154,17 @@ namespace ServerManagement
     {
       if (_socket != null && _socket.Connected)
       {
-        BackgroundWorker bwSender = new BackgroundWorker();
-        bwSender.DoWork += new DoWorkEventHandler(bwSender_DoWork);
-        bwSender.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bwSender_RunWorkerCompleted);
-        bwSender.RunWorkerAsync(cmd);
+        BackgroundWorker senderThread = new BackgroundWorker();
+        senderThread.DoWork += new DoWorkEventHandler(SenderThread_DoWork);
+        senderThread.RunWorkerCompleted += new RunWorkerCompletedEventHandler(SenderThread_RunWorkerCompleted);
+        senderThread.RunWorkerAsync(cmd);
       }
       else
+      {
         OnCommandFailed(new EventArgs());
+      }
     }
-
-
-
+    
     /// <summary>
     /// Disconnect the current client manager from the remote client and returns true if the client had been disconnected from the server.
     /// </summary>
@@ -271,11 +185,15 @@ namespace ServerManagement
         }
       }
       else
+      {
         return true;
+      }
     }
+
     #endregion
 
     #region Events
+
     /// <summary>
     /// Occurs when a command received from a remote client.
     /// </summary>
