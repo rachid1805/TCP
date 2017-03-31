@@ -9,8 +9,7 @@ namespace Server
 {
   class Program
   {
-    private IList<ClientManager> _clients;
-    private ServerManagement.Server _server;
+    private ServerManager _server;
     private BackgroundWorker _listenerThread;
 
     public static void Main(string[] args)
@@ -26,7 +25,7 @@ namespace Server
         port = int.Parse(args[1]);
       }
       Program programDomain = new Program();
-      programDomain._server = new ServerManagement.Server(hostNameOrAddress, port);
+      programDomain._server = new ServerManager(hostNameOrAddress, port);
 
       programDomain._listenerThread = new BackgroundWorker();
       programDomain._listenerThread.WorkerSupportsCancellation = true;
@@ -42,18 +41,10 @@ namespace Server
 
     private void DisconnectServer()
     {
-      if (_clients != null)
-      {
-        foreach (ClientManager client in _clients)
-        {
-          client.Disconnect();
-        }
-
-        _listenerThread.CancelAsync();
-        _listenerThread.Dispose();
-        _server.Close();
-        GC.Collect();
-      }
+      _server.Close();
+      _listenerThread.CancelAsync();
+      _listenerThread.Dispose();
+      GC.Collect();
     }
   }
 }
