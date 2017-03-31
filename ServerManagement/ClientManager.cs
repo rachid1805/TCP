@@ -97,7 +97,7 @@ namespace ServerManagement
         var readBytes = _socket.Receive(bytes);
         if (readBytes == 0)
           break;
-        Command cmd = (Command)Serializer.Deserialize(bytes);
+        CommandContainer cmd = (CommandContainer)SerializerManager.Deserialize(bytes);
 
         //// Read the command's Type.
         //byte[] buffer = new byte[4];
@@ -161,18 +161,18 @@ namespace ServerManagement
 
     private void bwSender_DoWork(object sender, DoWorkEventArgs e)
     {
-      Command cmd = (Command)e.Argument;
+      CommandContainer cmd = (CommandContainer)e.Argument;
       e.Result = SendCommandToClient(cmd);
     }
 
-    private bool SendCommandToClient(Command cmd)
+    private bool SendCommandToClient(CommandContainer cmd)
     {
       try
       {
         _semaphore.WaitOne();
 
         // Read the command object.
-        var bytes = Serializer.Serialize(cmd);
+        var bytes = SerializerManager.Serialize(cmd);
         _socket.Send(bytes);
 
         ////Type
@@ -236,7 +236,7 @@ namespace ServerManagement
     /// Sends a command to the remote client if the connection is alive.
     /// </summary>
     /// <param name="cmd">The command to send.</param>
-    public void SendCommand(Command cmd)
+    public void SendCommand(CommandContainer cmd)
     {
       if (_socket != null && _socket.Connected)
       {

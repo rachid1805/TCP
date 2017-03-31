@@ -159,7 +159,7 @@ namespace ClientManagement
         var readBytes = _clientSocket.Receive(bytes);
         if (readBytes == 0)
           break;
-        Command cmd = (Command)Serializer.Deserialize(bytes);
+        CommandContainer cmd = (CommandContainer)SerializerManager.Deserialize(bytes);
 
         //// Read the command's Type.
         //var bytes = new byte[4096];
@@ -250,19 +250,19 @@ namespace ClientManagement
 
     private void bwSender_DoWork(object sender , DoWorkEventArgs e)
     {
-      Command cmd = (Command)e.Argument;
+      CommandContainer cmd = (CommandContainer)e.Argument;
       e.Result = SendCommandToServer(cmd);
     }
 
     //This Semaphor is to protect the critical section from concurrent access of sender threads.
     System.Threading.Semaphore semaphor = new System.Threading.Semaphore(1 , 1);
-    private bool SendCommandToServer(Command cmd)
+    private bool SendCommandToServer(CommandContainer cmd)
     {
       try
       {
         semaphor.WaitOne();
 
-        byte[] cmdBytes = Serializer.Serialize(cmd);
+        byte[] cmdBytes = SerializerManager.Serialize(cmd);
         _clientSocket.Send(cmdBytes);
 
         //if ( cmd.MetaData == null || cmd.MetaData == "" )
@@ -299,7 +299,7 @@ namespace ClientManagement
       }
     }
 
-    private void SetMetaDataIfIsNull(Command cmd)
+    private void SetMetaDataIfIsNull(CommandContainer cmd)
     {
       //switch ( cmd.CommandType )
       //{
@@ -361,7 +361,7 @@ namespace ClientManagement
         //Command informToAllCMD = new Command(CommandType.ClientLoginInform , IPAddress.Broadcast , IP.ToString() + ":" + _networkName);
         //Inform to all clients that this client is now online.
         //Command cmd = new Command(CommandType.ClientLoginInform, IPAddress.Broadcast, IP.ToString() + ":" + _networkName);
-        Command cmd = new Command(CommandType.ClientLoginInform, new Profil(_userName, _password, true));
+        CommandContainer cmd = new CommandContainer(CommandType.ClientLoginInform, new ProfilContainer(_userName, _password, true));
         SendCommand(cmd);
       }
       catch
@@ -373,7 +373,7 @@ namespace ClientManagement
     /// Sends a command to the server if the connection is alive.
     /// </summary>
     /// <param name="cmd">The command to send.</param>
-    public void SendCommand(Command cmd)
+    public void SendCommand(CommandContainer cmd)
     {
       if ( _clientSocket != null && _clientSocket.Connected )
       {

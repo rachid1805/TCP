@@ -6,11 +6,11 @@ namespace Common
   /// A class that implements a command object.
   /// </summary>
   [Serializable]
-  public class Command
+  public class CommandContainer
   {
     #region Constructor
 
-    public Command(CommandType type, IData data)
+    public CommandContainer(CommandType type, IData data)
     {
       CommandType = type;
       Data = data;

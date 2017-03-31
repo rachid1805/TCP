@@ -6,11 +6,12 @@ using System.Text;
 namespace Common
 {
   [Serializable]
-  public class ConnectionStatus : IData
+  public class UsersStatusContainer : IData
   {
+    // User name + connection status
     private readonly IDictionary<string, bool> _clientsStatus;
 
-    public ConnectionStatus(IDictionary<string, bool> clientsStatus)
+    public UsersStatusContainer(IDictionary<string, bool> clientsStatus)
     {
       _clientsStatus = clientsStatus;
     }

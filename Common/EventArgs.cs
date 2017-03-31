@@ -33,11 +33,11 @@ namespace Common
   /// </summary>
   public class CommandEventArgs : EventArgs
   {
-    private Command command;
+    private CommandContainer command;
     /// <summary>
     /// The received command.
     /// </summary>
-    public Command Command
+    public CommandContainer Command
     {
       get { return command; }
     }
@@ -45,7 +45,7 @@ namespace Common
     /// Creates an instance of CommandEventArgs class.
     /// </summary>
     /// <param name="cmd">The received command.</param>
-    public CommandEventArgs(Command cmd)
+    public CommandEventArgs(CommandContainer cmd)
     {
       command = cmd;
     }

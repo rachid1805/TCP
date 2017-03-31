@@ -4,7 +4,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Common
 {
-  public class Serializer
+  public class SerializerManager
   {
     public static byte[] Serialize(object objectToSerialize)
     {

@@ -44,16 +44,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Command.cs" />
-    <Compile Include="ConnectionStatus.cs" />
+    <Compile Include="CommandContainer.cs" />
+    <Compile Include="RoomsContainer.cs" />
+    <Compile Include="RoomUsersContainer.cs" />
+    <Compile Include="UsersStatusContainer.cs" />
     <Compile Include="Definitions.cs" />
     <Compile Include="EventArgs.cs" />
     <Compile Include="IData.cs" />
     <Compile Include="MessageContainer.cs" />
-    <Compile Include="Profil.cs" />
+    <Compile Include="ProfilContainer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RoomContainer.cs" />
-    <Compile Include="Serializer.cs" />
+    <Compile Include="SerializerManager.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -10,7 +10,7 @@ namespace Common
   {
     #region Constructor
 
-    public MessageContainer(string userName, string room, string msg)
+    public MessageContainer(string userName, RoomContainer room, string msg)
     {
       User = userName;
       Room = room;
@@ -22,7 +22,7 @@ namespace Common
     #region Properties
 
     public string User { get; set; }
-    public string Room { get; set; }
+    public RoomContainer Room { get; set; }
     public string Msg { get; set; }
 
     #endregion

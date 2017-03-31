@@ -10,7 +10,7 @@ namespace ServerManagement
 {
   internal class ConnectionManager
   {
-    private readonly IDictionary<string, Profil> _members;
+    private readonly IDictionary<string, ProfilContainer> _members;
     private readonly IDictionary<string, Socket> _openedConnections;
     private Thread _synchronizationThread;
     private readonly int _synchronizationTime;
@@ -18,13 +18,13 @@ namespace ServerManagement
     internal ConnectionManager(int synchronizationTime)
     {
       _synchronizationTime = synchronizationTime;
-      _members = new Dictionary<string, Profil>();
+      _members = new Dictionary<string, ProfilContainer>();
       _openedConnections = new Dictionary<string, Socket>();
       _synchronizationThread = new Thread(SynchronizeClients);
       _synchronizationThread.Start();
     }
 
-    internal void AddNewConnection(Profil client, Socket socket)
+    internal void AddNewConnection(ProfilContainer client, Socket socket)
     {
       byte[] msg;
 
@@ -86,8 +86,8 @@ namespace ServerManagement
             clientsStatus.Add(client.Key, client.Value.Connected);
           }
 
-          var members = new ConnectionStatus(clientsStatus);
-          byte[] stream = Serializer.Serialize(members);
+          var members = new UsersStatusContainer(clientsStatus);
+          byte[] stream = SerializerManager.Serialize(members);
 
           foreach (var clientId in _members.Keys)
           {
