@@ -14,10 +14,10 @@ namespace ServerManagement
   /// </summary>
   public class ClientManager
   {
-    private Socket _socket;
+    private readonly Socket _socket;
     private string _clientName;
-    private BackgroundWorker _receiverThread;
-    private Semaphore _semaphore = new Semaphore(1, 1);
+    private readonly BackgroundWorker _receiverThread;
+    private readonly Semaphore _semaphore;
 
     #region Constructor
 
@@ -28,6 +28,7 @@ namespace ServerManagement
     public ClientManager(Socket clientSocket)
     {
       _socket = clientSocket;
+      _semaphore = new Semaphore(1, 1);
       _receiverThread = new BackgroundWorker();
       _receiverThread.DoWork += new DoWorkEventHandler(StartReceive);
       _receiverThread.RunWorkerAsync();
@@ -43,9 +44,10 @@ namespace ServerManagement
       get
       {
         if (_socket != null)
+        {
           return ((IPEndPoint)_socket.RemoteEndPoint).Address;
-        else
-          return IPAddress.None;
+        }
+        return IPAddress.None;
       }
     }
     /// <summary>
@@ -56,9 +58,10 @@ namespace ServerManagement
       get
       {
         if (_socket != null)
+        {
           return ((IPEndPoint)_socket.RemoteEndPoint).Port;
-        else
-          return -1;
+        }
+        return -1;
       }
     }
     /// <summary>
@@ -69,9 +72,10 @@ namespace ServerManagement
       get
       {
         if (_socket != null)
+        {
           return _socket.Connected;
-        else
-          return false;
+        }
+        return false;
       }
     }
         
@@ -143,9 +147,11 @@ namespace ServerManagement
         return false;
       }
     }
+
     #endregion
 
     #region Public Methods
+
     /// <summary>
     /// Sends a command to the remote client if the connection is alive.
     /// </summary>
@@ -184,10 +190,7 @@ namespace ServerManagement
           return false;
         }
       }
-      else
-      {
-        return true;
-      }
+      return true;
     }
 
     #endregion
@@ -198,6 +201,7 @@ namespace ServerManagement
     /// Occurs when a command received from a remote client.
     /// </summary>
     public event CommandReceivedEventHandler CommandReceived;
+
     /// <summary>
     /// Occurs when a command received from a remote client.
     /// </summary>
@@ -205,13 +209,16 @@ namespace ServerManagement
     protected virtual void OnCommandReceived(CommandEventArgs e)
     {
       if (CommandReceived != null)
+      {
         CommandReceived(this, e);
+      }
     }
 
     /// <summary>
     /// Occurs when a command had been sent to the remote client successfully.
     /// </summary>
     public event CommandSentEventHandler CommandSent;
+
     /// <summary>
     /// Occurs when a command had been sent to the remote client successfully.
     /// </summary>
@@ -219,13 +226,16 @@ namespace ServerManagement
     protected virtual void OnCommandSent(EventArgs e)
     {
       if (CommandSent != null)
+      {
         CommandSent(this, e);
+      }
     }
 
     /// <summary>
     /// Occurs when a command sending action had been failed.This is because disconnection or sending exception.
     /// </summary>
     public event CommandSendingFailedEventHandler CommandFailed;
+
     /// <summary>
     /// Occurs when a command sending action had been failed.This is because disconnection or sending exception.
     /// </summary>
@@ -233,7 +243,9 @@ namespace ServerManagement
     protected virtual void OnCommandFailed(EventArgs e)
     {
       if (CommandFailed != null)
+      {
         CommandFailed(this, e);
+      }
     }
 
     /// <summary>
