@@ -5,6 +5,7 @@ using System.Text;
 
 namespace Common
 {
+  [Serializable]
   public class RoomUsersContainer : IData
   {
     private RoomContainer _room;

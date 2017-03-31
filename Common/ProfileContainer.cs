@@ -3,14 +3,14 @@
 namespace Common
 {
   [Serializable]
-  public class ProfilContainer : IData
+  public class ProfileContainer : IData
   {
     private readonly string _user;
     private readonly string _password;
     private readonly bool _newUser;
     private bool _connected;
 
-    public ProfilContainer(string user, string password, bool newUser)
+    public ProfileContainer(string user, string password, bool newUser)
     {
       _user = user;
       _password = password;

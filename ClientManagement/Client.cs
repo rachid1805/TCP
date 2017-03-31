@@ -361,7 +361,7 @@ namespace ClientManagement
         //Command informToAllCMD = new Command(CommandType.ClientLoginInform , IPAddress.Broadcast , IP.ToString() + ":" + _networkName);
         //Inform to all clients that this client is now online.
         //Command cmd = new Command(CommandType.ClientLoginInform, IPAddress.Broadcast, IP.ToString() + ":" + _networkName);
-        CommandContainer cmd = new CommandContainer(CommandType.ClientLoginInform, new ProfilContainer(_userName, _password, true));
+        CommandContainer cmd = new CommandContainer(CommandType.ClientLoginInform, new ProfileContainer(_userName, _password, true));
         SendCommand(cmd);
       }
       catch

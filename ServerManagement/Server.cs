@@ -14,7 +14,7 @@ namespace ServerManagement
 {
   public class Server
   {
-    private readonly IDictionary<string, ProfilContainer> _members;
+    private readonly IDictionary<string, ProfileContainer> _members;
     private readonly ConnectionManager _connectionManager;
     private readonly IPEndPoint _localEndPoint;
     private Socket _listenerSocket;
@@ -23,7 +23,7 @@ namespace ServerManagement
 
     public Server(string hostNameOrAddress, int port)
     {
-      _members = new Dictionary<string, ProfilContainer>();
+      _members = new Dictionary<string, ProfileContainer>();
       _connectionManager = new ConnectionManager((int)Definitions.SYNCHRONIZATION_TIME);
 
       // Establish the local endpoint for the socket
@@ -74,7 +74,7 @@ namespace ServerManagement
           switch (cmd.CommandType)
           {
             case CommandType.ClientLoginInform:
-              var profil = (ProfilContainer) cmd.Data;
+              var profil = (ProfileContainer) cmd.Data;
               _connectionManager.AddNewConnection(profil, handler);
               Console.WriteLine("New connected client {0}", profil.UserName);
               break;
