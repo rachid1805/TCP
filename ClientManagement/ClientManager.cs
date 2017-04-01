@@ -18,7 +18,7 @@ namespace ClientManagement
   {
     private Socket _clientSocket;
     private readonly Semaphore _semaphore;
-    private BackgroundWorker _bwReceiver;
+    private BackgroundWorker _receiverThread;
     private IPEndPoint _serverEP;
     private string _userName;
     private string _password;
@@ -48,6 +48,7 @@ namespace ClientManagement
     {
       _serverEP = new IPEndPoint(serverIP, port);
       _userName = netName;
+      _semaphore = new Semaphore(1, 1);
       System.Net.NetworkInformation.NetworkChange.NetworkAvailabilityChanged += new System.Net.NetworkInformation.NetworkAvailabilityChangedEventHandler(NetworkChange_NetworkAvailabilityChanged);
     }
 
@@ -144,101 +145,6 @@ namespace ClientManagement
 
     #endregion
 
-    #region Private Methods
-
-    private void NetworkChange_NetworkAvailabilityChanged(object sender , System.Net.NetworkInformation.NetworkAvailabilityEventArgs e)
-    {
-      if (!e.IsAvailable)
-      {
-        OnNetworkDead(new EventArgs());
-        OnDisconnectedFromServer(new ClientEventArgs(_clientSocket));
-      }
-      else
-      {
-        OnNetworkAlived(new EventArgs());
-      }
-    }
-
-    private void StartReceive(object sender , DoWorkEventArgs e)
-    {
-      while (_clientSocket.Connected)
-      {
-        // Read the command object.
-        var bytes = new byte[8192];
-        var readBytes = _clientSocket.Receive(bytes);
-        if (readBytes == 0)
-          break;
-        CommandContainer cmd = (CommandContainer)SerializerManager.Deserialize(bytes);
-
-        OnCommandReceived(new CommandEventArgs(cmd));
-      }
-      OnServerDisconnected(new ServerEventArgs(_clientSocket));
-      Disconnect();
-    }
-
-    private void SenderThread_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-    {
-      if (!e.Cancelled && e.Error == null && ((bool) e.Result))
-      {
-        OnCommandSent(new EventArgs());
-      }
-      else
-      {
-        OnCommandFailed(new EventArgs());
-      }
-
-      ((BackgroundWorker)sender).Dispose();
-      GC.Collect();
-    }
-
-    private void SenderThread_DoWork(object sender , DoWorkEventArgs e)
-    {
-      CommandContainer cmd = (CommandContainer)e.Argument;
-      e.Result = SendCommandToServer(cmd);
-    }
-
-    private bool SendCommandToServer(CommandContainer cmd)
-    {
-      try
-      {
-        _semaphore.WaitOne();
-
-        byte[] cmdBytes = SerializerManager.Serialize(cmd);
-        _clientSocket.Send(cmdBytes);
-
-        _semaphore.Release();
-
-        return true;
-      }
-      catch (Exception ex)
-      {
-        _semaphore.Release();
-        return false;
-      }
-    }
-
-    private void SetMetaDataIfIsNull(CommandContainer cmd)
-    {
-      //switch ( cmd.CommandType )
-      //{
-      //  case ( CommandType.ClientLoginInform ):
-      //    cmd.MetaData = IP.ToString() + ":" + _networkName;
-      //    break;
-      //  case ( CommandType.PCLockWithTimer ):
-      //  case ( CommandType.PCLogOFFWithTimer ):
-      //  case ( CommandType.PCRestartWithTimer ):
-      //  case ( CommandType.PCShutDownWithTimer ):
-      //  case ( CommandType.UserExitWithTimer ):
-      //    cmd.MetaData = "60000";
-      //    break;
-      //  default:
-      //    cmd.MetaData = "\n";
-      //    break;
-      //}
-    }
- 
-    #endregion
-
     #region Public Methods
 
     /// <summary>
@@ -273,17 +179,17 @@ namespace ClientManagement
         _clientSocket = new Socket(AddressFamily.InterNetwork , SocketType.Stream , ProtocolType.Tcp);
         _clientSocket.Connect(_serverEP);
         e.Result = true;
-        _bwReceiver = new BackgroundWorker();
-        _bwReceiver.WorkerSupportsCancellation = true;
-        _bwReceiver.DoWork += new DoWorkEventHandler(StartReceive);
-        _bwReceiver.RunWorkerAsync();
+        _receiverThread = new BackgroundWorker();
+        _receiverThread.WorkerSupportsCancellation = true;
+        _receiverThread.DoWork += new DoWorkEventHandler(StartReceive);
+        _receiverThread.RunWorkerAsync();
 
         ////Inform to all clients that this client is now online.
-        //Command informToAllCMD = new Command(CommandType.ClientLoginInform , IPAddress.Broadcast , IP.ToString() + ":" + _networkName);
+        //Command informToAllCMD = new Command(CommandType.ClientLogIn , IPAddress.Broadcast , IP.ToString() + ":" + _networkName);
         //Inform to all clients that this client is now online.
-        //Command cmd = new Command(CommandType.ClientLoginInform, IPAddress.Broadcast, IP.ToString() + ":" + _networkName);
-        //CommandContainer cmd = new CommandContainer(CommandType.ClientLoginInform, new ProfileContainer(_userName, _password, true));
-        //SendCommand(cmd);
+        //Command cmd = new Command(CommandType.ClientLogIn, IPAddress.Broadcast, IP.ToString() + ":" + _networkName);
+        CommandContainer cmd = new CommandContainer(CommandType.ClientSignUp, new ProfileContainer(_userName, _password, true));
+        SendCommand(cmd);
       }
       catch
       {
@@ -316,13 +222,13 @@ namespace ClientManagement
     /// <returns>True if the client had been disconnected from the server,otherwise false.</returns>
     public bool Disconnect()
     {
-      if (_clientSocket != null && _clientSocket.Connected )
+      if (_clientSocket != null && _clientSocket.Connected)
       {
         try
         {
           _clientSocket.Shutdown(SocketShutdown.Both);
           _clientSocket.Close();
-          _bwReceiver.CancelAsync();
+          _receiverThread.CancelAsync();
           OnDisconnectedFromServer(new ClientEventArgs(_clientSocket));
           return true;
         }
@@ -332,8 +238,11 @@ namespace ClientManagement
         }
       }
       else
+      {
         return true;
-    } 
+      }
+    }
+
     #endregion
 
     #region Events
@@ -342,6 +251,7 @@ namespace ClientManagement
     /// Occurs when a command received from a remote client.
     /// </summary>
     public event CommandReceivedEventHandler CommandReceived;
+
     /// <summary>
     /// Occurs when a command received from a remote client.
     /// </summary>
@@ -366,13 +276,14 @@ namespace ClientManagement
     /// Occurs when a command had been sent to the the remote server Successfully.
     /// </summary>
     public event CommandSentEventHandler CommandSent;
+
     /// <summary>
     /// Occurs when a command had been sent to the the remote server Successfully.
     /// </summary>
     /// <param name="e">The sent command.</param>
     protected virtual void OnCommandSent(EventArgs e)
     {
-      if ( CommandSent != null )
+      if (CommandSent != null)
       {
         Control target = CommandSent.Target as Control;
         if (target != null && target.InvokeRequired)
@@ -397,7 +308,7 @@ namespace ClientManagement
     /// <param name="e">The sent command.</param>
     protected virtual void OnCommandFailed(EventArgs e)
     {
-      if ( CommandFailed != null )
+      if (CommandFailed != null)
       {
         Control target = CommandFailed.Target as Control;
         if (target != null && target.InvokeRequired)
@@ -422,7 +333,7 @@ namespace ClientManagement
     /// <param name="e">Server information.</param>
     protected virtual void OnServerDisconnected(ServerEventArgs e)
     {
-      if ( ServerDisconnected != null )
+      if (ServerDisconnected != null)
       {
         Control target = ServerDisconnected.Target as Control;
         if (target != null && target.InvokeRequired)
@@ -447,7 +358,7 @@ namespace ClientManagement
     /// <param name="e">EventArgs.</param>
     protected virtual void OnDisconnectedFromServer(ClientEventArgs e)
     {
-      if ( DisconnectedFromServer != null )
+      if (DisconnectedFromServer != null)
       {
         Control target = DisconnectedFromServer.Target as Control;
         if (target != null && target.InvokeRequired)
@@ -472,7 +383,7 @@ namespace ClientManagement
     /// <param name="e">EventArgs.</param>
     protected virtual void OnConnectingSuccessed(EventArgs e)
     {
-      if ( ConnectingSuccessed != null )
+      if (ConnectingSuccessed != null)
       {
         Control target = ConnectingSuccessed.Target as Control;
         if (target != null && target.InvokeRequired)
@@ -497,7 +408,7 @@ namespace ClientManagement
     /// <param name="e">EventArgs.</param>
     protected virtual void OnConnectingFailed(EventArgs e)
     {
-      if ( ConnectingFailed != null )
+      if (ConnectingFailed != null)
       {
         Control target = ConnectingFailed.Target as Control;
         if (target != null && target.InvokeRequired)
@@ -547,7 +458,7 @@ namespace ClientManagement
     /// <param name="e">EventArgs.</param>
     protected virtual void OnNetworkAlived(EventArgs e)
     {
-      if ( NetworkAlived != null )
+      if (NetworkAlived != null)
       {
         Control target = NetworkAlived.Target as Control;
         if (target != null && target.InvokeRequired)
@@ -559,6 +470,101 @@ namespace ClientManagement
           NetworkAlived(this , e);
         }
       }
+    }
+
+    #endregion
+
+    #region Private Methods
+
+    private void NetworkChange_NetworkAvailabilityChanged(object sender, System.Net.NetworkInformation.NetworkAvailabilityEventArgs e)
+    {
+      if (!e.IsAvailable)
+      {
+        OnNetworkDead(new EventArgs());
+        OnDisconnectedFromServer(new ClientEventArgs(_clientSocket));
+      }
+      else
+      {
+        OnNetworkAlived(new EventArgs());
+      }
+    }
+
+    private void StartReceive(object sender, DoWorkEventArgs e)
+    {
+      while (_clientSocket.Connected)
+      {
+        // Read the command object.
+        var bytes = new byte[8192];
+        var readBytes = _clientSocket.Receive(bytes);
+        if (readBytes == 0)
+          break;
+        CommandContainer cmd = (CommandContainer)SerializerManager.Deserialize(bytes);
+
+        OnCommandReceived(new CommandEventArgs(cmd));
+      }
+      OnServerDisconnected(new ServerEventArgs(_clientSocket));
+      Disconnect();
+    }
+
+    private void SenderThread_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+    {
+      if (!e.Cancelled && e.Error == null && ((bool)e.Result))
+      {
+        OnCommandSent(new EventArgs());
+      }
+      else
+      {
+        OnCommandFailed(new EventArgs());
+      }
+
+      ((BackgroundWorker)sender).Dispose();
+      GC.Collect();
+    }
+
+    private void SenderThread_DoWork(object sender, DoWorkEventArgs e)
+    {
+      CommandContainer cmd = (CommandContainer)e.Argument;
+      e.Result = SendCommandToServer(cmd);
+    }
+
+    private bool SendCommandToServer(CommandContainer cmd)
+    {
+      try
+      {
+        _semaphore.WaitOne();
+
+        byte[] cmdBytes = SerializerManager.Serialize(cmd);
+        _clientSocket.Send(cmdBytes);
+
+        _semaphore.Release();
+
+        return true;
+      }
+      catch (Exception ex)
+      {
+        _semaphore.Release();
+        return false;
+      }
+    }
+
+    private void SetMetaDataIfIsNull(CommandContainer cmd)
+    {
+      //switch ( cmd.CommandType )
+      //{
+      //  case ( CommandType.ClientLogIn ):
+      //    cmd.MetaData = IP.ToString() + ":" + _networkName;
+      //    break;
+      //  case ( CommandType.PCLockWithTimer ):
+      //  case ( CommandType.PCLogOFFWithTimer ):
+      //  case ( CommandType.PCRestartWithTimer ):
+      //  case ( CommandType.PCShutDownWithTimer ):
+      //  case ( CommandType.UserExitWithTimer ):
+      //    cmd.MetaData = "60000";
+      //    break;
+      //  default:
+      //    cmd.MetaData = "\n";
+      //    break;
+      //}
     }
 
     #endregion

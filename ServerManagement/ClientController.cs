@@ -99,9 +99,15 @@ namespace ServerManagement
         var readBytes = _socket.Receive(bytes);
         if (readBytes == 0)
           break;
-        CommandContainer cmd = (CommandContainer)SerializerManager.Deserialize(bytes);
+        CommandContainer command = (CommandContainer)SerializerManager.Deserialize(bytes);
+
+        if ((command.CommandType == CommandType.ClientSignUp) || (command.CommandType == CommandType.ClientLogIn))
+        {
+          ProfileContainer profile = (ProfileContainer)command.Data;
+          _clientName = profile.UserName;
+        }
         
-        OnCommandReceived(new CommandEventArgs(cmd));
+        OnCommandReceived(new CommandEventArgs(command));
       }
       OnDisconnected(new ClientEventArgs(_socket));
       Disconnect();

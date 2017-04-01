@@ -146,9 +146,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Images\Signup.png" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\ClientManagement\ClientManagement.csproj">
       <Project>{6462c5ee-be8c-4587-9e16-8caf1b59d9f0}</Project>
       <Name>ClientManagement</Name>

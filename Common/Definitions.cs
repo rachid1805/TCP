@@ -22,13 +22,17 @@ namespace Common
     /// </summary>
     Message,
     /// <summary>
-    /// This command will sent to all clients when a specific client is had been logged in to the server.The metadata of this command is in this format : "ClientIP:ClientNetworkName"
+    /// A registration of a new client
     /// </summary>
-    ClientLoginInform,
+    ClientSignUp,
     /// <summary>
-    /// This command will sent to all clients when an specific client is had been logged off from the server.You can get the disconnected client information from SenderIP and SenderName properties of command event args.
+    /// A client login in the server
     /// </summary>
-    ClientLogOffInform,
+    ClientLogIn,
+    /// <summary>
+    /// A client logoff from the server
+    /// </summary>
+    ClientLogOff,
     
     IsNameExists,
     

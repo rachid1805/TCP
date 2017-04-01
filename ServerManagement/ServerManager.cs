@@ -92,12 +92,12 @@ namespace ServerManagement
 
     private void CreateNewClientManager(Socket socket)
     {
-      ClientController newClientManager = new ClientController(socket);
-      newClientManager.CommandReceived += new CommandReceivedEventHandler(CommandReceived);
-      newClientManager.DisconnectedClient += new ClientDisconnectedEventHandler(ClientDisconnected);
-      CheckForAbnormalDisconnection(newClientManager);
-      _clients.Add(newClientManager);
-      UpdateConsole("Connected.", newClientManager.IP, newClientManager.Port);
+      ClientController clientController = new ClientController(socket);
+      clientController.CommandReceived += new CommandReceivedEventHandler(CommandReceived);
+      clientController.DisconnectedClient += new ClientDisconnectedEventHandler(ClientDisconnected);
+      CheckForAbnormalDisconnection(clientController);
+      _clients.Add(clientController);
+      UpdateConsole("Connected.", clientController.IP, clientController.Port);
     }
 
     private void CommandReceived(object sender, CommandEventArgs e)
@@ -106,9 +106,17 @@ namespace ServerManagement
 
       switch (e.Command.CommandType)
       {
-        case CommandType.ClientLoginInform:
-          var profil = (ProfileContainer)e.Command.Data;
-          Console.WriteLine("New connected client {0}", profil.UserName);
+        case CommandType.ClientSignUp:
+          var newProfile = (ProfileContainer)e.Command.Data;
+          Console.WriteLine("New registred client {0}", newProfile.UserName);
+          // TODO: validate credentials and user
+          SendCommandToClient(sender, new CommandContainer(CommandType.ValidCredentials, null));
+          break;
+        case CommandType.ClientLogIn:
+          var profile = (ProfileContainer)e.Command.Data;
+          Console.WriteLine("New connected client {0}", profile.UserName);
+          // TODO: validate credentials and user
+          SendCommandToClient(sender, new CommandContainer(CommandType.ValidCredentials, null));
           break;
       }
     }
@@ -140,7 +148,7 @@ namespace ServerManagement
           _clients.RemoveAt(index);
 
           // Inform all clients that a client had been disconnected.
-          //Command cmd = new Command(CommandType.ClientLogOffInform, IPAddress.Broadcast);
+          //Command cmd = new Command(CommandType.ClientLogOff, IPAddress.Broadcast);
           //cmd.SenderName = name;
           //cmd.SenderIP = ip;
           //BroadCastCommand(cmd);
@@ -158,9 +166,23 @@ namespace ServerManagement
       {
         index++;
         if (client.IP.Equals(ip))
+        {
           return index;
+        }
       }
       return -1;
+    }
+
+    private void SendCommandToClient(object sender, CommandContainer command)
+    {
+      foreach (ClientController client in _clients)
+      {
+        if (client.ClientName.Equals(((ClientController)sender).ClientName))
+        {
+          client.SendCommand(command);
+          return;
+        }
+      }
     }
 
     private void UpdateConsole(string status, IPAddress IP, int port)
