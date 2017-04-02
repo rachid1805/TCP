@@ -63,11 +63,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PrivateFrm.cs">
+    <Compile Include="RoomFrm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="PrivateFrm.Designer.cs">
-      <DependentUpon>PrivateFrm.cs</DependentUpon>
+    <Compile Include="RoomFrm.Designer.cs">
+      <DependentUpon>RoomFrm.cs</DependentUpon>
     </Compile>
     <Compile Include="MainFrm.cs">
       <SubType>Form</SubType>
@@ -78,8 +78,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ShareUtils.cs" />
-    <EmbeddedResource Include="PrivateFrm.resx">
-      <DependentUpon>PrivateFrm.cs</DependentUpon>
+    <EmbeddedResource Include="RoomFrm.resx">
+      <DependentUpon>RoomFrm.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFrm.resx">
