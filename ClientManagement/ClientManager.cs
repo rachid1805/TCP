@@ -495,12 +495,19 @@ namespace ClientManagement
       {
         // Read the command object.
         var bytes = new byte[8192];
-        var readBytes = _clientSocket.Receive(bytes);
-        if (readBytes == 0)
-          break;
-        CommandContainer cmd = (CommandContainer)SerializerManager.Deserialize(bytes);
+        try
+        {
+          var readBytes = _clientSocket.Receive(bytes);
+          if (readBytes == 0)
+            break;
+          CommandContainer cmd = (CommandContainer)SerializerManager.Deserialize(bytes);
 
-        OnCommandReceived(new CommandEventArgs(cmd));
+          OnCommandReceived(new CommandEventArgs(cmd));
+        }
+        catch (Exception exception)
+        {
+          Console.WriteLine(exception);
+        }
       }
       OnServerDisconnected(new ServerEventArgs(_clientSocket));
       Disconnect();
