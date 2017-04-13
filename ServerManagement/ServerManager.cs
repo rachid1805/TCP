@@ -17,6 +17,7 @@ namespace ServerManagement
     private IList<ClientController> _clients;
     private readonly IPEndPoint _localEndPoint;
     private Socket _listenerSocket;
+    private readonly IUsersManager _usersManager;
 
     #region Contsructor
 
@@ -121,7 +122,7 @@ namespace ServerManagement
       }
     }
 
-    void ClientDisconnected(object sender, ClientEventArgs e)
+    private void ClientDisconnected(object sender, ClientEventArgs e)
     {
       if (RemoveClientManager(e.IP))
       {

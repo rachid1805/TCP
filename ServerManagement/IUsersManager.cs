@@ -6,6 +6,13 @@ using System.Text;
 
 namespace ServerManagement
 {
+  public enum RegistrationStatus
+  {
+    Successful,
+    AlreadyRegistred,
+    InvalidCredentials
+  }
+
   /// <summary>
   /// The users management interface
   /// </summary>
@@ -14,12 +21,12 @@ namespace ServerManagement
     /// <summary>
     /// Register a new user to the server and save the user list in the disk
     /// </summary>
-    void RegisterNewUser(ProfileContainer profil);
+    RegistrationStatus RegisterNewUser(ProfileContainer newProfile);
 
     /// <summary>
     /// Connected/Disconnected user
     /// </summary>
-    void UpdateUserStatus(string userId, bool connectionStatus);
+    RegistrationStatus UpdateUserStatus(string userId, bool connectionStatus);
 
     /// <summary>
     /// Return true if the specified user is already registred in the server
