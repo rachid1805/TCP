@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Net;
 using System.Net.Sockets;
 using System.ComponentModel;
@@ -96,18 +94,24 @@ namespace ServerManagement
       {
         // Read the command object.
         var bytes = new byte[8192];
-        var readBytes = _socket.Receive(bytes);
-        if (readBytes == 0)
-          break;
-        CommandContainer command = (CommandContainer)SerializerManager.Deserialize(bytes);
-
-        if ((command.CommandType == CommandType.ClientSignUp) || (command.CommandType == CommandType.ClientLogIn))
+        try
         {
-          ProfileContainer profile = (ProfileContainer)command.Data;
-          _clientName = profile.UserName;
+          var readBytes = _socket.Receive(bytes);
+          if (readBytes == 0)
+            break;
+          CommandContainer command = (CommandContainer)SerializerManager.Deserialize(bytes);
+
+          if ((command.CommandType == CommandType.ClientSignUp) || (command.CommandType == CommandType.ClientLogIn))
+          {
+            ProfileContainer profile = (ProfileContainer)command.Data;
+            _clientName = profile.UserName;
+          }
+
+          OnCommandReceived(new CommandEventArgs(command));
         }
-        
-        OnCommandReceived(new CommandEventArgs(command));
+        catch (Exception)
+        {
+        }
       }
       OnDisconnected(new ClientEventArgs(_socket));
       Disconnect();

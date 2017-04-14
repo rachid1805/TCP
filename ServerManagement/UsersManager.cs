@@ -1,17 +1,14 @@
-﻿using System;
+﻿using System.Runtime.Serialization.Formatters.Binary;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
+using System.IO;
 using Common;
 
 namespace ServerManagement
 {
   public class UsersManager : IUsersManager
   {
-    private readonly IList<ProfileContainer> _profiles;
+    private readonly List<ProfileContainer> _profiles;
     private const string _fileName = "profiles.bin";
 
     #region Constructor
@@ -19,16 +16,20 @@ namespace ServerManagement
     public UsersManager()
     {
       _profiles = new List<ProfileContainer>();
-      
-      var size = Marshal.SizeOf(typeof(ProfileContainer));
-      using (FileStream file = new FileStream(_fileName, FileMode.Open, FileAccess.Read))
+
+      if (File.Exists(_fileName))
       {
-        while (file.Position != file.Length)
+        using (Stream stream = File.Open(_fileName, FileMode.Open))
         {
-          var buffer = new byte[size];
-          file.Read(buffer, (int)file.Position, size);
-          _profiles.Add((ProfileContainer)SerializerManager.Deserialize(buffer));
+          var binaryFormatter = new BinaryFormatter();
+          _profiles = (List<ProfileContainer>)binaryFormatter.Deserialize(stream);
         }
+      }
+
+      // Make sure all users are disconnected at startup
+      foreach (ProfileContainer profile in _profiles)
+      {
+        profile.Connected = false;
       }
     }
 
@@ -39,7 +40,6 @@ namespace ServerManagement
     public RegistrationStatus RegisterNewUser(ProfileContainer newProfile)
     {
       var registrationStatus = RegistrationStatus.Successful;
-      var size = Marshal.SizeOf(typeof(ProfileContainer));
 
       if (_profiles.Any(profile => profile.UserName.Equals(newProfile.UserName)))
       {
@@ -48,9 +48,10 @@ namespace ServerManagement
       if (registrationStatus != RegistrationStatus.AlreadyRegistred)
       {
         _profiles.Add(newProfile);
-        using (FileStream file = new FileStream(_fileName, FileMode.Open, FileAccess.Write))
+        using (Stream stream = File.Open(_fileName, FileMode.Create))
         {
-          file.Write(SerializerManager.Serialize(newProfile), (int)file.Position, size);
+          var binaryFormatter = new BinaryFormatter();
+          binaryFormatter.Serialize(stream, _profiles);
         }
       }
 
@@ -59,15 +60,46 @@ namespace ServerManagement
 
     public RegistrationStatus UpdateUserStatus(string userId, bool connectionStatus)
     {
-      throw new NotImplementedException();
+      foreach (ProfileContainer profile in _profiles)
+      {
+        if (profile.UserName.Equals(userId))
+        {
+          profile.Connected = connectionStatus;
+
+          return RegistrationStatus.Successful;
+        }
+      }
+
+      return RegistrationStatus.InvalidCredentials;
     }
 
     public bool IsRegistredUser(string userId)
     {
-      throw new NotImplementedException();
+      foreach (ProfileContainer profile in _profiles)
+      {
+        if (profile.UserName.Equals(userId))
+        {
+          return true;
+        }
+      }
+
+      return false;
     }
 
-    public UsersStatusContainer RegistredUsers { get; private set; }
+    public UsersStatusContainer RegistredUsers
+    {
+      get
+      {
+        var clientsStatus = new Dictionary<string, bool>();
+
+        foreach (ProfileContainer profile in _profiles)
+        {
+          clientsStatus.Add(profile.UserName, profile.Connected);
+        }
+
+        return new UsersStatusContainer(clientsStatus);
+      }
+    }
 
     #endregion
   }

@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
 using Common;
 using System.ComponentModel;
 
@@ -24,6 +19,7 @@ namespace ServerManagement
     public ServerManager(string hostNameOrAddress, int port)
     {
       _clients = new List<ClientController>();
+      _usersManager = new UsersManager();
 
       // Establish the local endpoint for the socket
       IPHostEntry ipHostEntry = Dns.GetHostEntry(hostNameOrAddress);
@@ -59,8 +55,6 @@ namespace ServerManagement
         // Start listening for connections.  
         while (true)
         {
-          Console.WriteLine("Waiting for a new connection...");
-
           // Program is suspended while waiting for an incoming connection.  
           CreateNewClientManager(_listenerSocket.Accept());
         }
@@ -98,7 +92,7 @@ namespace ServerManagement
       clientController.DisconnectedClient += new ClientDisconnectedEventHandler(ClientDisconnected);
       CheckForAbnormalDisconnection(clientController);
       _clients.Add(clientController);
-      UpdateConsole("Connected.", clientController.IP, clientController.Port);
+      UpdateConsole("Opened.", clientController.IP, clientController.Port);
     }
 
     private void CommandReceived(object sender, CommandEventArgs e)
@@ -109,9 +103,20 @@ namespace ServerManagement
       {
         case CommandType.ClientSignUp:
           var newProfile = (ProfileContainer)e.Command.Data;
-          Console.WriteLine("New registred client {0}", newProfile.UserName);
+          var cmdType = CommandType.ValidCredentials;
+          var registrationStatus = _usersManager.RegisterNewUser(newProfile);
+          if (registrationStatus == RegistrationStatus.Successful)
+          {
+            cmdType = CommandType.ValidCredentials;
+            Console.WriteLine("New registred client {0}", newProfile.UserName);
+          }
+          else
+          {
+            cmdType = CommandType.UserAlreadyExists;
+            Console.WriteLine("Already registred client {0}", newProfile.UserName);
+          }
           // TODO: validate credentials and user
-          SendCommandToClient(sender, new CommandContainer(CommandType.ValidCredentials, null));
+          SendCommandToClient(sender, new CommandContainer(cmdType, null));
           break;
         case CommandType.ClientLogIn:
           var profile = (ProfileContainer)e.Command.Data;
@@ -126,7 +131,7 @@ namespace ServerManagement
     {
       if (RemoveClientManager(e.IP))
       {
-        UpdateConsole("Disconnected.", e.IP, e.Port);
+        UpdateConsole("Closed.", e.IP, e.Port);
       }
     }
 
@@ -134,7 +139,7 @@ namespace ServerManagement
     {
       if (RemoveClientManager(client.IP))
       {
-        UpdateConsole("Disconnected.", client.IP, client.Port);
+        UpdateConsole("Closed.", client.IP, client.Port);
       }
     }
 
@@ -188,7 +193,7 @@ namespace ServerManagement
 
     private void UpdateConsole(string status, IPAddress IP, int port)
     {
-      Console.WriteLine("Client {0}{1}{2} has been {3} ( {4}|{5} )", IP.ToString(), ":", port.ToString(), status,
+      Console.WriteLine("Channel {0}{1}{2} has been {3} ( {4}|{5} )", IP.ToString(), ":", port.ToString(), status,
         DateTime.Now.ToShortDateString(), DateTime.Now.ToLongTimeString());
     }
 
