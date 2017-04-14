@@ -31,7 +31,7 @@ namespace ServerManagement
     /// <summary>
     /// Return true if the specified user is already registred in the server
     /// </summary>
-    bool IsRegistredUser(string userId);
+    bool IsRegistredUser(string userId, string password);
 
     /// <summary>
     /// Return all registred users and their status (connected or not)

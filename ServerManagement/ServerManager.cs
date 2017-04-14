@@ -103,26 +103,33 @@ namespace ServerManagement
       {
         case CommandType.ClientSignUp:
           var newProfile = (ProfileContainer)e.Command.Data;
-          var cmdType = CommandType.ValidCredentials;
           var registrationStatus = _usersManager.RegisterNewUser(newProfile);
           if (registrationStatus == RegistrationStatus.Successful)
           {
-            cmdType = CommandType.ValidCredentials;
             Console.WriteLine("New registred client {0}", newProfile.UserName);
+            SendCommandToClient(sender, new CommandContainer(CommandType.ValidCredentials, null));
+            SendCommandToClient(sender, new CommandContainer(CommandType.SendClientList, _usersManager.RegistredUsers));
           }
           else
           {
-            cmdType = CommandType.UserAlreadyExists;
             Console.WriteLine("Already registred client {0}", newProfile.UserName);
+            SendCommandToClient(sender, new CommandContainer(CommandType.UserAlreadyExists, null));
           }
-          // TODO: validate credentials and user
-          SendCommandToClient(sender, new CommandContainer(cmdType, null));
           break;
         case CommandType.ClientLogIn:
           var profile = (ProfileContainer)e.Command.Data;
-          Console.WriteLine("New connected client {0}", profile.UserName);
-          // TODO: validate credentials and user
-          SendCommandToClient(sender, new CommandContainer(CommandType.ValidCredentials, null));
+          if (_usersManager.IsRegistredUser(profile.UserName, profile.Password))
+          {
+            _usersManager.UpdateUserStatus(profile.UserName, true);
+            Console.WriteLine("New connected client {0}", profile.UserName);
+            SendCommandToClient(sender, new CommandContainer(CommandType.ValidCredentials, null));
+            SendCommandToClient(sender, new CommandContainer(CommandType.SendClientList, _usersManager.RegistredUsers));
+          }
+          else
+          {
+            Console.WriteLine("Connection of client {0} refused", profile.UserName);
+            SendCommandToClient(sender, new CommandContainer(CommandType.InvalidCredentials, null));
+          }
           break;
       }
     }

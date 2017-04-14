@@ -1,9 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Net;
 using System.Net.Sockets;
-using System.IO;
 using System.ComponentModel;
 using System.Threading;
 using System.Windows.Forms;
@@ -22,6 +19,7 @@ namespace ClientManagement
     private IPEndPoint _serverEP;
     private string _userName;
     private string _password;
+    private readonly bool _login;
 
     #region Contsructors
 
@@ -30,10 +28,11 @@ namespace ClientManagement
     /// </summary>
     /// <param name="server">The remote server to connect.</param>
     /// <param name="netName">The string that will send to the server and then to other clients, to identify this client to all clients.</param>
-    public ClientManager(IPEndPoint server, string netName)
+    public ClientManager(IPEndPoint server, string netName, bool login)
     {
       _serverEP = server;
       _userName = netName;
+      _login = login;
       _semaphore = new Semaphore(1, 1);
       System.Net.NetworkInformation.NetworkChange.NetworkAvailabilityChanged += new System.Net.NetworkInformation.NetworkAvailabilityChangedEventHandler(NetworkChange_NetworkAvailabilityChanged);
     }
@@ -44,12 +43,9 @@ namespace ClientManagement
     ///<param name="serverIP">The IP of remote server.</param>
     ///<param name="port">The port of remote server.</param>
     /// <param name="netName">The string that will send to the server and then to other clients, to identify this client to all clients.</param>
-    public ClientManager(IPAddress serverIP, int port, string netName)
+    public ClientManager(IPAddress serverIP, int port, string netName, bool login)
+      :this(new IPEndPoint(serverIP, port), netName, login)
     {
-      _serverEP = new IPEndPoint(serverIP, port);
-      _userName = netName;
-      _semaphore = new Semaphore(1, 1);
-      System.Net.NetworkInformation.NetworkChange.NetworkAvailabilityChanged += new System.Net.NetworkInformation.NetworkAvailabilityChangedEventHandler(NetworkChange_NetworkAvailabilityChanged);
     }
 
     #endregion
@@ -188,7 +184,16 @@ namespace ClientManagement
         //Command informToAllCMD = new Command(CommandType.ClientLogIn , IPAddress.Broadcast , IP.ToString() + ":" + _networkName);
         //Inform to all clients that this client is now online.
         //Command cmd = new Command(CommandType.ClientLogIn, IPAddress.Broadcast, IP.ToString() + ":" + _networkName);
-        CommandContainer cmd = new CommandContainer(CommandType.ClientSignUp, new ProfileContainer(_userName, _password, true));
+        CommandType cmdType;
+        if (_login)
+        {
+          cmdType = CommandType.ClientLogIn;
+        }
+        else
+        {
+          cmdType = CommandType.ClientSignUp;
+        }
+        CommandContainer cmd = new CommandContainer(cmdType, new ProfileContainer(_userName, _password));
         SendCommand(cmd);
       }
       catch

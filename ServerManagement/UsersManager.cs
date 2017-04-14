@@ -47,6 +47,7 @@ namespace ServerManagement
       }
       if (registrationStatus != RegistrationStatus.AlreadyRegistred)
       {
+        newProfile.Connected = true;
         _profiles.Add(newProfile);
         using (Stream stream = File.Open(_fileName, FileMode.Create))
         {
@@ -73,11 +74,11 @@ namespace ServerManagement
       return RegistrationStatus.InvalidCredentials;
     }
 
-    public bool IsRegistredUser(string userId)
+    public bool IsRegistredUser(string userId, string password)
     {
       foreach (ProfileContainer profile in _profiles)
       {
-        if (profile.UserName.Equals(userId))
+        if (profile.UserName.Equals(userId) && profile.Password.Equals(password))
         {
           return true;
         }
