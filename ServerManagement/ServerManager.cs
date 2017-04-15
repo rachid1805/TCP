@@ -138,7 +138,7 @@ namespace ServerManagement
           break;
         case CommandType.CreateRoom:
           var newRoom = (RoomContainer)e.Command.Data;
-          var newRoomUsers = new RoomUsersContainer(newRoom);  //wrap room in a RoomUsersContainer object. List of users is emppty
+          var newRoomUsers = new RoomUsersContainer(newRoom);  //wrap room in a RoomUsersContainer object. List of users is empty
           if (!_roomsContainer.RoomExist(newRoomUsers))         //if room does not exist
           {
             _roomsContainer.AddRoom(newRoomUsers);
@@ -151,9 +151,6 @@ namespace ServerManagement
             Console.WriteLine("Room {0} already exists", newRoomUsers.GetRoom().Name);
             SendCommandToClient(sender, new CommandContainer(CommandType.RoomAlreadyExists, null));
           }
-          break;
-        case CommandType.RequestRoomList:
-          SendCommandToAllClient(sender, new CommandContainer(CommandType.RoomList, _roomsContainer));
           break;
       }
     }
