@@ -46,10 +46,9 @@ namespace Common
 
     ConnectToRoom,
 
-    /// <summary>
-    /// To get a list of current connected clients to the server,Send this type of command to it.The server will replay to you one same command for each client with the metadata in this format : "ClientIP:ClientNetworkName".
-    /// </summary>
     SendClientList,
+
+    UsersConnectionStatus,
     /// <summary>
     /// This is a free command that you can sent to the server.
     /// </summary>

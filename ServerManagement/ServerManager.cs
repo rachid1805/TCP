@@ -9,10 +9,10 @@ namespace ServerManagement
 {
   public class ServerManager
   {
-    private IList<ClientController> _clients;
+    private readonly IList<ClientController> _clients;
     private readonly IPEndPoint _localEndPoint;
-    private Socket _listenerSocket;
     private readonly IUsersManager _usersManager;
+    private Socket _listenerSocket;
 
     #region Contsructor
 
@@ -90,7 +90,7 @@ namespace ServerManagement
       ClientController clientController = new ClientController(socket);
       clientController.CommandReceived += new CommandReceivedEventHandler(CommandReceived);
       clientController.DisconnectedClient += new ClientDisconnectedEventHandler(ClientDisconnected);
-      CheckForAbnormalDisconnection(clientController);
+      //CheckForAbnormalDisconnection(clientController);
       _clients.Add(clientController);
       UpdateConsole("Opened.", clientController.IP, clientController.Port);
     }
@@ -108,7 +108,7 @@ namespace ServerManagement
           {
             Console.WriteLine("New registred client {0}", newProfile.UserName);
             SendCommandToClient(sender, new CommandContainer(CommandType.ValidCredentials, null));
-            SendCommandToClient(sender, new CommandContainer(CommandType.SendClientList, _usersManager.RegistredUsers));
+            SendCommandToAllClient(sender, new CommandContainer(CommandType.UsersConnectionStatus, new UsersStatusContainer(_usersManager.RegistredUsers.ClientsStatus)));
           }
           else
           {
@@ -123,7 +123,7 @@ namespace ServerManagement
             _usersManager.UpdateUserStatus(profile.UserName, true);
             Console.WriteLine("New connected client {0}", profile.UserName);
             SendCommandToClient(sender, new CommandContainer(CommandType.ValidCredentials, null));
-            SendCommandToClient(sender, new CommandContainer(CommandType.SendClientList, _usersManager.RegistredUsers));
+            SendCommandToAllClient(sender, new CommandContainer(CommandType.UsersConnectionStatus, new UsersStatusContainer(_usersManager.RegistredUsers.ClientsStatus)));
           }
           else
           {
@@ -131,12 +131,15 @@ namespace ServerManagement
             SendCommandToClient(sender, new CommandContainer(CommandType.InvalidCredentials, null));
           }
           break;
+        case CommandType.SendClientList:
+          SendCommandToClient(sender, new CommandContainer(CommandType.UsersConnectionStatus, new UsersStatusContainer(_usersManager.RegistredUsers.ClientsStatus)));
+          break;
       }
     }
 
     private void ClientDisconnected(object sender, ClientEventArgs e)
     {
-      if (RemoveClientManager(e.IP))
+      if (RemoveClientManager(e.IP, e.Port))
       {
         UpdateConsole("Closed.", e.IP, e.Port);
       }
@@ -144,27 +147,25 @@ namespace ServerManagement
 
     private void CheckForAbnormalDisconnection(ClientController client)
     {
-      if (RemoveClientManager(client.IP))
+      if (RemoveClientManager(client.IP, client.Port))
       {
         UpdateConsole("Closed.", client.IP, client.Port);
       }
     }
 
-    private bool RemoveClientManager(IPAddress ip)
+    private bool RemoveClientManager(IPAddress ip, int port)
     {
       lock (this)
       {
-        int index = IndexOfClient(ip);
+        int index = IndexOfClient(ip, port);
         if (index != -1)
         {
           string name = _clients[index].ClientName;
           _clients.RemoveAt(index);
 
-          // Inform all clients that a client had been disconnected.
-          //Command cmd = new Command(CommandType.ClientLogOff, IPAddress.Broadcast);
-          //cmd.SenderName = name;
-          //cmd.SenderIP = ip;
-          //BroadCastCommand(cmd);
+          // Inform all connected clients that a client had been disconnected.
+          _usersManager.UpdateUserStatus(name, false);
+          SendCommandToAllClient(this, new CommandContainer(CommandType.UsersConnectionStatus, new UsersStatusContainer(_usersManager.RegistredUsers.ClientsStatus)));
 
           return true;
         }
@@ -172,13 +173,13 @@ namespace ServerManagement
       }
     }
 
-    private int IndexOfClient(IPAddress ip)
+    private int IndexOfClient(IPAddress ip, int port)
     {
       int index = -1;
       foreach (ClientController client in _clients)
       {
         index++;
-        if (client.IP.Equals(ip))
+        if (client.IP.Equals(ip) && client.Port.Equals(port))
         {
           return index;
         }
@@ -195,6 +196,14 @@ namespace ServerManagement
           client.SendCommand(command);
           return;
         }
+      }
+    }
+
+    private void SendCommandToAllClient(object sender, CommandContainer command)
+    {
+      foreach (ClientController client in _clients)
+      {
+        client.SendCommand(command);
       }
     }
 
