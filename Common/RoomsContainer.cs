@@ -19,18 +19,18 @@ namespace Common
 
         #endregion
 
-        #region Public
+    #region Public
 
-    public bool roomExist(RoomUsersContainer room)
+    public bool RoomExist(RoomUsersContainer room)
     {
-        foreach (RoomUsersContainer theRoom in _rooms)
+      foreach (RoomUsersContainer theRoom in _rooms)
+      {
+        if (theRoom.getRoom().Name.Equals(room.getRoom().Name))
         {
-            if (theRoom.getRoom().Name.Equals(room.getRoom().Name))
-            {
-                return true;
-            }
+          return true;
         }
-        return false;
+      }
+      return false;
     }
 
     public void AddRoom(RoomUsersContainer room)
@@ -52,17 +52,19 @@ namespace Common
 
       return false;
     }
+
     //Update users' list for a room
     public bool UpdateRoom(RoomUsersContainer room)
     {
-        //to be implemented
-        return false;
+      //to be implemented
+      return false;
     }
 
-    public IList<RoomUsersContainer> getAllRooms()
+    public IList<RoomUsersContainer> GetAllRooms()
     {
-        return _rooms;
+      return _rooms;
     }
-        #endregion
-    }
+
+    #endregion
+  }
 }
