@@ -152,6 +152,9 @@ namespace ServerManagement
             SendCommandToClient(sender, new CommandContainer(CommandType.RoomAlreadyExists, null));
           }
           break;
+        case CommandType.RequestRoomList:
+          SendCommandToAllClient(sender, new CommandContainer(CommandType.RoomList, _roomsContainer));
+          break;
       }
     }
 

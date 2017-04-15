@@ -57,9 +57,9 @@ namespace Common
     {
       foreach (RoomUsersContainer theRoom in _rooms)
       {
-        if (theRoom.getRoom().Name.Equals(room.getRoom().Name))
+        if (theRoom.GetRoom().Name.Equals(room.GetRoom().Name))
         {
-          foreach (string user in room.getRoomUsersList())
+          foreach (string user in room.GetRoomUsersList())
           {
             theRoom.AddUser(user);
           }
@@ -73,7 +73,7 @@ namespace Common
     {
       foreach (RoomUsersContainer theRoom in _rooms)
       {
-        foreach (string user in theRoom.getRoomUsersList())
+        foreach (string user in theRoom.GetRoomUsersList())
         {
           if (userRemove.Equals(user))
           {
