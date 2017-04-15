@@ -8,6 +8,8 @@ namespace Common
   [Serializable]
   public class RoomContainer : IData
   {
+    private string _roomName;
+    private string _roomDescription;
     #region Constructors
 
     public RoomContainer(string name)
@@ -15,19 +17,27 @@ namespace Common
     {
     }
 
-    public RoomContainer(string name, string description)
+    public RoomContainer(string roomName, string roomDescription)
     {
-      Name = name;
-      Description = description;
+        _roomName = roomName;
+        _roomDescription = roomDescription;
     }
 
     #endregion
 
     #region Properties
 
-    public string Name { get; set; }
-    public string Description { get; set; }
+    public string Name
+    {
+       get { return _roomName; }
+       set { this._roomName = value; }
+    }
+    public string Description
+    {
+        get { return _roomDescription; }
+        set { this._roomDescription = value; }
+    }
 
     #endregion
-  }
+    }
 }

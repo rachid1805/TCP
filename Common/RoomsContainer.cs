@@ -8,24 +8,24 @@ namespace Common
   [Serializable]
   public class RoomsContainer : IData
   {
-    private IList<RoomContainer> _rooms;
+    private IList<RoomUsersContainer> _rooms;
 
     #region Constructor
 
     public RoomsContainer()
     {
-      _rooms = new List<RoomContainer>();
+      _rooms = new List<RoomUsersContainer>();
     }
 
     #endregion
 
     #region Public
 
-    public bool AddRoom(RoomContainer room)
+    public bool AddRoom(RoomUsersContainer room)
     {
-      foreach (RoomContainer theRoom in _rooms)
+      foreach (RoomUsersContainer theRoom in _rooms)
       {
-        if (theRoom.Name.Equals(room.Name))
+        if (theRoom.getRoom().Name.Equals(room.getRoom().Name))
         {
           return false;
         }
@@ -35,20 +35,30 @@ namespace Common
       return true;
     }
 
-    public bool RemoveRoom(RoomContainer room)
+    public bool RemoveRoom(RoomUsersContainer room)
     {
-      foreach (RoomContainer theRoom in _rooms)
+      foreach (RoomUsersContainer theRoom in _rooms)
       {
-        if (theRoom.Name.Equals(room.Name))
+        if (theRoom.getRoom().Name.Equals(room.getRoom().Name))
         {
-          _rooms.Remove(room);
+          _rooms.Remove(theRoom);
           return true;
         }
       }
 
       return false;
     }
+    //Update users' list for a room
+    public bool UpdateRoom(RoomUsersContainer room)
+    {
+        //to be implemented
+        return false;
+    }
 
-    #endregion
-  }
+    public IList<RoomUsersContainer> getAllRooms()
+    {
+        return _rooms;
+    }
+        #endregion
+    }
 }
