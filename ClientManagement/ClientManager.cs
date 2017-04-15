@@ -179,11 +179,7 @@ namespace ClientManagement
         _receiverThread.WorkerSupportsCancellation = true;
         _receiverThread.DoWork += new DoWorkEventHandler(StartReceive);
         _receiverThread.RunWorkerAsync();
-
-        ////Inform to all clients that this client is now online.
-        //Command informToAllCMD = new Command(CommandType.ClientLogIn , IPAddress.Broadcast , IP.ToString() + ":" + _networkName);
-        //Inform to all clients that this client is now online.
-        //Command cmd = new Command(CommandType.ClientLogIn, IPAddress.Broadcast, IP.ToString() + ":" + _networkName);
+        
         CommandType cmdType;
         if (_login)
         {
@@ -557,26 +553,6 @@ namespace ClientManagement
         _semaphore.Release();
         return false;
       }
-    }
-
-    private void SetMetaDataIfIsNull(CommandContainer cmd)
-    {
-      //switch ( cmd.CommandType )
-      //{
-      //  case ( CommandType.ClientLogIn ):
-      //    cmd.MetaData = IP.ToString() + ":" + _networkName;
-      //    break;
-      //  case ( CommandType.PCLockWithTimer ):
-      //  case ( CommandType.PCLogOFFWithTimer ):
-      //  case ( CommandType.PCRestartWithTimer ):
-      //  case ( CommandType.PCShutDownWithTimer ):
-      //  case ( CommandType.UserExitWithTimer ):
-      //    cmd.MetaData = "60000";
-      //    break;
-      //  default:
-      //    cmd.MetaData = "\n";
-      //    break;
-      //}
     }
 
     #endregion

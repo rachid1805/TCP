@@ -13,7 +13,7 @@ namespace Common
   }
 
   /// <summary>
-  /// The type of commands that you can sent to the server.(Note : These are just some comman types.You should do the desired actions when a command received to the client yourself.)
+  /// The type of commands exchanged between the server and the clients
   /// </summary>
   public enum CommandType
   {
@@ -30,28 +30,48 @@ namespace Common
     /// </summary>
     ClientLogIn,
     /// <summary>
-    /// A client logoff from the server
+    /// A failure registration of an existing user name
     /// </summary>
-    ClientLogOff,
-    
-    IsNameExists,
-    
     UserAlreadyExists,
-
+    /// <summary>
+    /// A client has entered a bad credentials
+    /// </summary>
     InvalidCredentials,
-
+    /// <summary>
+    /// A client has entered a valid credentials
+    /// </summary>
     ValidCredentials,
-
-    CreateRoom,
-
-    ConnectToRoom,
-
-    SendClientList,
-
+    /// <summary>
+    /// A client requests the list of the status of all clients (connected or not to the chat system)
+    /// </summary>
+    RequestClientList,
+    /// <summary>
+    /// The server sends the list of the status of all clients (connected or not to the chat system)
+    /// </summary>
     UsersConnectionStatus,
     /// <summary>
-    /// This is a free command that you can sent to the server.
+    /// A client requests the creation of a new discussion room
     /// </summary>
-    FreeCommand
+    CreateRoom,
+    /// <summary>
+    /// A client requests the connection to an existing discussion room
+    /// </summary>
+    ConnectToRoom,
+    /// <summary>
+    /// A client requests the list of all existing rooms
+    /// </summary>
+    RequestRoomList,
+    /// <summary>
+    /// The server sends the list of all existing rooms
+    /// </summary>
+    RoomList,
+    /// <summary>
+    /// A client requests the room archive
+    /// </summary>
+    RequestRoomArchive,
+    /// <summary>
+    /// The server sends the room archive
+    /// </summary>
+    RoomArchive
   }
 }

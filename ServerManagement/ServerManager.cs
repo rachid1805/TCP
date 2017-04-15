@@ -131,7 +131,7 @@ namespace ServerManagement
             SendCommandToClient(sender, new CommandContainer(CommandType.InvalidCredentials, null));
           }
           break;
-        case CommandType.SendClientList:
+        case CommandType.RequestClientList:
           SendCommandToClient(sender, new CommandContainer(CommandType.UsersConnectionStatus, new UsersStatusContainer(_usersManager.RegistredUsers.ClientsStatus)));
           break;
       }
