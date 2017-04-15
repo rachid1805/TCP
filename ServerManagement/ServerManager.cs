@@ -13,6 +13,7 @@ namespace ServerManagement
     private readonly IPEndPoint _localEndPoint;
     private readonly IUsersManager _usersManager;
     private Socket _listenerSocket;
+    private readonly RoomsContainer _roomsManager;
 
     #region Contsructor
 
@@ -134,7 +135,23 @@ namespace ServerManagement
         case CommandType.RequestClientList:
           SendCommandToClient(sender, new CommandContainer(CommandType.UsersConnectionStatus, new UsersStatusContainer(_usersManager.RegistredUsers.ClientsStatus)));
           break;
-      }
+        case CommandType.CreateRoom:
+            var newRoom = (RoomContainer)e.Command.Data;
+            var newRoomUsers = new RoomUsersContainer(newRoom);  //wrap room in a RoomUsersContainer object. List of users is emppty
+            if (! _roomsManager.roomExist(newRoomUsers))         //if room does not exist
+            {
+                _roomsManager.AddRoom(newRoomUsers);
+                Console.WriteLine("New room created {0}", newRoomUsers.getRoom().Name);
+                SendCommandToClient(sender, new CommandContainer(CommandType.RoomCreated, null));
+                SendCommandToAllClient(sender, new CommandContainer(CommandType.RoomList, _roomsManager));
+            }
+            else
+            {
+                Console.WriteLine("Room {0} already exists", newRoomUsers.getRoom().Name);
+                SendCommandToClient(sender, new CommandContainer(CommandType.RoomAlreadyExists, null));
+            }
+            break;
+            }
     }
 
     private void ClientDisconnected(object sender, ClientEventArgs e)

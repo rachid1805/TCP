@@ -54,6 +54,10 @@ namespace Common
     /// </summary>
     CreateRoom,
     /// <summary>
+    /// The server confirms the creation of the room
+    /// </summary>
+    RoomCreated,
+    /// <summary>
     /// The specified room name already exists
     /// </summary>
     RoomAlreadyExists,

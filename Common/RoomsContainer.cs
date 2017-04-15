@@ -17,22 +17,26 @@ namespace Common
       _rooms = new List<RoomUsersContainer>();
     }
 
-    #endregion
+        #endregion
 
-    #region Public
+        #region Public
 
-    public bool AddRoom(RoomUsersContainer room)
+    public bool roomExist(RoomUsersContainer room)
     {
-      foreach (RoomUsersContainer theRoom in _rooms)
-      {
-        if (theRoom.getRoom().Name.Equals(room.getRoom().Name))
+        foreach (RoomUsersContainer theRoom in _rooms)
         {
-          return false;
+            if (theRoom.getRoom().Name.Equals(room.getRoom().Name))
+            {
+                return true;
+            }
         }
-      }
-      _rooms.Add(room);
+        return false;
+    }
 
-      return true;
+    public void AddRoom(RoomUsersContainer room)
+    {
+      _rooms.Add(room);
+      //return true;
     }
 
     public bool RemoveRoom(RoomUsersContainer room)
