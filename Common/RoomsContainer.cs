@@ -25,7 +25,7 @@ namespace Common
     {
       foreach (RoomUsersContainer theRoom in _rooms)
       {
-        if (theRoom.getRoom().Name.Equals(room.getRoom().Name))
+        if (theRoom.GetRoom().Name.Equals(room.GetRoom().Name))
         {
           return true;
         }
@@ -43,7 +43,7 @@ namespace Common
     {
       foreach (RoomUsersContainer theRoom in _rooms)
       {
-        if (theRoom.getRoom().Name.Equals(room.getRoom().Name))
+        if (theRoom.GetRoom().Name.Equals(room.GetRoom().Name))
         {
           _rooms.Remove(theRoom);
           return true;

@@ -49,15 +49,16 @@ namespace Common
       return userRemoved;
     }
 
-    public IList<String> getRoomUsersList()
+    public IList<String> GetRoomUsersList()
     {
-        return _users;
+      return _users;
     }
 
-        public RoomContainer getRoom()
+    public RoomContainer GetRoom()
     {
-        return _room;
+      return _room;
     }
-        #endregion
-    }
+
+    #endregion
+  }
 }

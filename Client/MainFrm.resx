@@ -126,7 +126,7 @@
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAADi
-        FAAAAk1TRnQBSQFMAgEBBQEAAQkBAAEQAQABEAEAARABAAT/ASEBEAj/AUIBTQE2BwABNgMAASgDAAFA
+        FAAAAk1TRnQBSQFMAgEBBQEAAQkBAAEUAQABEAEAARABAAT/ASEBEAj/AUIBTQE2BwABNgMAASgDAAFA
         AwABIAMAAQEBAAEgBgABIP8A/wD/AP8AKgABKwIBAUABUgICAaABYAEJAQwB4AFgAQgBCwHgAVICAgGg
         ASsCAQFA5AABKwIBAUABXwEDAQYB0AE6AVoBwAH/ASoBUgHQAf8BGgFKAcAB/wEaAToBoAH/AV8CAwHQ
         ASsCAQFA4AABUgICAaABSgFqAdAB/wFaAXoB4AH/AUoBegHgAf8BOgFqAeAB/wEqAVIB0AH/ARoBOgGg
@@ -567,5 +567,11 @@
   </data>
   <data name="OffLine.Image" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Images\OffLine.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="mniConnectToRoom.Image" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Images\ChatConnect.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="mniCreateRoom.Image" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Images\ChatCreate.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

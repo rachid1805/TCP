@@ -142,15 +142,18 @@ namespace ServerManagement
           if (!_roomsContainer.RoomExist(newRoomUsers))         //if room does not exist
           {
             _roomsContainer.AddRoom(newRoomUsers);
-            Console.WriteLine("New room created {0}", newRoomUsers.getRoom().Name);
+            Console.WriteLine("New room created {0}", newRoomUsers.GetRoom().Name);
             SendCommandToClient(sender, new CommandContainer(CommandType.RoomCreated, null));
             SendCommandToAllClient(sender, new CommandContainer(CommandType.RoomList, _roomsContainer));
           }
           else
           {
-            Console.WriteLine("Room {0} already exists", newRoomUsers.getRoom().Name);
+            Console.WriteLine("Room {0} already exists", newRoomUsers.GetRoom().Name);
             SendCommandToClient(sender, new CommandContainer(CommandType.RoomAlreadyExists, null));
           }
+          break;
+        case CommandType.RequestRoomList:
+          SendCommandToAllClient(sender, new CommandContainer(CommandType.RoomList, _roomsContainer));
           break;
       }
     }
