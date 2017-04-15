@@ -54,6 +54,10 @@ namespace Common
     /// </summary>
     CreateRoom,
     /// <summary>
+    /// The specified room name already exists
+    /// </summary>
+    RoomAlreadyExists,
+    /// <summary>
     /// A client requests the connection to an existing discussion room
     /// </summary>
     ConnectToRoom,
