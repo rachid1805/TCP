@@ -52,11 +52,20 @@ namespace Common
 
       return false;
     }
-
-    //Update users' list for a room
-    public bool UpdateRoom(RoomUsersContainer room)
+    //add check if user already in room
+    public bool AddUsers(RoomUsersContainer room)
     {
-      //to be implemented
+      foreach (RoomUsersContainer theRoom in _rooms)
+      {
+        if (theRoom.getRoom().Name.Equals(room.getRoom().Name))
+        {
+          foreach (string user in room.getRoomUsersList())
+          {
+            theRoom.AddUser(user);
+          }
+          return true;
+        }
+      }
       return false;
     }
 

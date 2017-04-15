@@ -62,9 +62,17 @@ namespace Common
     /// </summary>
     RoomAlreadyExists,
     /// <summary>
+    /// The specified room name does not exists
+    /// </summary>
+    RoomDoesNotExists,
+    /// <summary>
     /// A client requests the connection to an existing discussion room
     /// </summary>
     ConnectToRoom,
+    /// <summary>
+    /// Server confirmes the connection to the room
+    /// </summary>
+    UserConnectedToRoom,
     /// <summary>
     /// A client requests the list of all existing rooms
     /// </summary>

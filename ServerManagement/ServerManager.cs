@@ -138,7 +138,7 @@ namespace ServerManagement
           break;
         case CommandType.CreateRoom:
           var newRoom = (RoomContainer)e.Command.Data;
-          var newRoomUsers = new RoomUsersContainer(newRoom);  //wrap room in a RoomUsersContainer object. List of users is emppty
+          var newRoomUsers = new RoomUsersContainer(newRoom);  //wrap room in a RoomUsersContainer object. List of users is empty
           if (!_roomsContainer.RoomExist(newRoomUsers))         //if room does not exist
           {
             _roomsContainer.AddRoom(newRoomUsers);
@@ -150,6 +150,24 @@ namespace ServerManagement
           {
             Console.WriteLine("Room {0} already exists", newRoomUsers.getRoom().Name);
             SendCommandToClient(sender, new CommandContainer(CommandType.RoomAlreadyExists, null));
+          }
+          break;
+        case CommandType.ConnectToRoom:
+          var roomConnect = (RoomUsersContainer)e.Command.Data;  //receives a roomUsersContainer (room + user list)
+          if (_roomsContainer.RoomExist(roomConnect))            //if room exists
+          {
+            _roomsContainer.AddUsers(roomConnect);
+            foreach (string user in roomConnect.getRoomUsersList())
+            {
+              Console.WriteLine("User {0} added to room {1}", user, roomConnect.getRoom().Name);
+            }              
+            SendCommandToClient(sender, new CommandContainer(CommandType.UserConnectedToRoom, null));
+            SendCommandToAllClient(sender, new CommandContainer(CommandType.RoomList, _roomsContainer));
+          }
+          else
+          {
+            Console.WriteLine("Room {0} does not exists", roomConnect.getRoom().Name);
+            SendCommandToClient(sender, new CommandContainer(CommandType.RoomDoesNotExists, null));
           }
           break;
       }
