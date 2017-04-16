@@ -161,7 +161,7 @@ namespace ServerManagement
             {
               Console.WriteLine("User {0} added to room {1}", user, roomConnect.GetRoom().Name);
             }
-            SendCommandToClient(sender, new CommandContainer(CommandType.UserConnectedToRoom, null));
+            //SendCommandToClient(sender, new CommandContainer(CommandType.UserConnectedToRoom, null));
             SendCommandToAllClient(sender, new CommandContainer(CommandType.RoomList, _roomsContainer));
           }
           else
@@ -178,17 +178,23 @@ namespace ServerManagement
 
     private void ClientDisconnected(object sender, ClientEventArgs e)
     {
+      string name = _clients[IndexOfClient(e.IP, e.Port)].ClientName;
       if (RemoveClientManager(e.IP, e.Port))
       {
         UpdateConsole("Closed.", e.IP, e.Port);
+        _roomsContainer.RemoveUser(name);
+        SendCommandToAllClient(this, new CommandContainer(CommandType.RoomList, _roomsContainer));
       }
     }
 
     private void CheckForAbnormalDisconnection(ClientController client)
     {
+      string name = _clients[IndexOfClient(client.IP, client.Port)].ClientName;
       if (RemoveClientManager(client.IP, client.Port))
       {
         UpdateConsole("Closed.", client.IP, client.Port);
+        _roomsContainer.RemoveUser(name);
+        SendCommandToAllClient(this, new CommandContainer(CommandType.RoomList, _roomsContainer));
       }
     }
 
@@ -205,7 +211,6 @@ namespace ServerManagement
           // Inform all connected clients that a client had been disconnected.
           _usersManager.UpdateUserStatus(name, false);
           SendCommandToAllClient(this, new CommandContainer(CommandType.UsersConnectionStatus, new UsersStatusContainer(_usersManager.RegistredUsers.ClientsStatus)));
-
           return true;
         }
         return false;
