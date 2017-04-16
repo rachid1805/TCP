@@ -48,6 +48,16 @@ namespace Common
       return false;
     }
 
+    public RoomContainer GetRoom()
+    {
+      return _room;
+    }
+    public IList<MessageContainer> GetMessagesList()
+    {
+      return _archive;
+    }
+
+
     #endregion
   }
 }

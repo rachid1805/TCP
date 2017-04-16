@@ -42,6 +42,7 @@
     <Compile Include="ClientController.cs" />
     <Compile Include="IMessagesManager.cs" />
     <Compile Include="IUsersManager.cs" />
+    <Compile Include="MessagesContainer.cs" />
     <Compile Include="ProfilesContainer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServerManager.cs" />

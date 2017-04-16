@@ -14,12 +14,12 @@ namespace ServerManagement
     /// <summary>
     /// Register a new message in the server memory
     /// </summary>
-    void AddNewMessage(MessageContainer message);
+    bool AddNewMessage(MessageContainer message);
 
     /// <summary>
     /// Remove a message from the server
     /// </summary>
-    bool RemoveMessage(string userId, string roomId, int msgId);
+    bool RemoveMessage(MessageContainer message);
 
     /// <summary>
     /// Return an archive of the specified room
