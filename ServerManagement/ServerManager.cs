@@ -14,6 +14,7 @@ namespace ServerManagement
     private readonly IUsersManager _usersManager;
     private Socket _listenerSocket;
     private readonly RoomsContainer _roomsContainer;
+    private readonly MessagesContainer _messagesContainer;
 
     #region Contsructor
 
@@ -22,6 +23,8 @@ namespace ServerManagement
       _clients = new List<ClientController>();
       _usersManager = new UsersManager();
       _roomsContainer = new RoomsContainer();
+      _messagesContainer = new MessagesContainer();
+
 
       // Establish the local endpoint for the socket
       IPHostEntry ipHostEntry = Dns.GetHostEntry(hostNameOrAddress);
@@ -152,6 +155,7 @@ namespace ServerManagement
           if (!_roomsContainer.RoomExist(newRoomUsers))         //if room does not exist
           {
             _roomsContainer.AddRoom(newRoomUsers);
+            _messagesContainer.AddRoomArchive(new RoomArchiveContainer(newRoom));
             Console.WriteLine("New room created {0}", newRoomUsers.GetRoom().Name);
             SendCommandToClient(sender, new CommandContainer(CommandType.RoomCreated, null));
             SendCommandToAllClient(sender, new CommandContainer(CommandType.RoomList, _roomsContainer));
@@ -198,6 +202,38 @@ namespace ServerManagement
           else
           {
             Console.WriteLine("Room {0} does not exists", roomDisconnect.GetRoom().Name);
+            SendCommandToClient(sender, new CommandContainer(CommandType.RoomDoesNotExists, null));
+          }
+          break;
+        case CommandType.Message:
+          var message = (MessageContainer)e.Command.Data;
+
+          if (_messagesContainer.AddNewMessage(message))
+          {
+            Console.WriteLine("Message sent to room {0}", message.Room.Name);
+            foreach (RoomUsersContainer roomUser in _roomsContainer.GetAllRooms())
+            {
+              if (roomUser.GetRoom().Name.Equals(message.Room.Name))
+              {
+                foreach (string user in roomUser.GetRoomUsersList())
+                {
+                  foreach (ClientController client in _clients)
+                  {
+                    if (client.ClientName.Equals(user)) //user is is message room
+                    {
+                      if (!client.ClientName.Equals(message.User)) //don't send to user that created the message
+                      {
+                        SendCommandToClient(client, new CommandContainer(CommandType.Message, message));
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+          else
+          {
+            Console.WriteLine("Room {0} does not exists", message.Room.Name);
             SendCommandToClient(sender, new CommandContainer(CommandType.RoomDoesNotExists, null));
           }
           break;
