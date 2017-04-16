@@ -152,6 +152,24 @@ namespace ServerManagement
             SendCommandToClient(sender, new CommandContainer(CommandType.RoomAlreadyExists, null));
           }
           break;
+        case CommandType.ConnectToRoom:
+          var roomConnect = (RoomUsersContainer)e.Command.Data;  //receives a roomUsersContainer (room + user list)
+          if (_roomsContainer.RoomExist(roomConnect))            //if room exists
+          {
+            _roomsContainer.AddUsers(roomConnect);
+            foreach (string user in roomConnect.GetRoomUsersList())
+            {
+              Console.WriteLine("User {0} added to room {1}", user, roomConnect.GetRoom().Name);
+            }
+            SendCommandToClient(sender, new CommandContainer(CommandType.UserConnectedToRoom, null));
+            SendCommandToAllClient(sender, new CommandContainer(CommandType.RoomList, _roomsContainer));
+          }
+          else
+          {
+            Console.WriteLine("Room {0} does not exists", roomConnect.GetRoom().Name);
+            SendCommandToClient(sender, new CommandContainer(CommandType.RoomDoesNotExists, null));
+          }
+          break;
         case CommandType.RequestRoomList:
           SendCommandToAllClient(sender, new CommandContainer(CommandType.RoomList, _roomsContainer));
           break;
