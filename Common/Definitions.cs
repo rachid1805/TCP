@@ -34,6 +34,10 @@ namespace Common
     /// </summary>
     UserAlreadyExists,
     /// <summary>
+    /// A failure connection of an existing user name
+    /// </summary>
+    UserAlreadyConnected,
+    /// <summary>
     /// A client has entered a bad credentials
     /// </summary>
     InvalidCredentials,
