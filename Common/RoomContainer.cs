@@ -10,6 +10,7 @@ namespace Common
   {
     private string _roomName;
     private string _roomDescription;
+
     #region Constructors
 
     public RoomContainer(string name)
@@ -19,8 +20,8 @@ namespace Common
 
     public RoomContainer(string roomName, string roomDescription)
     {
-        _roomName = roomName;
-        _roomDescription = roomDescription;
+      _roomName = roomName;
+      _roomDescription = roomDescription;
     }
 
     #endregion
@@ -29,15 +30,16 @@ namespace Common
 
     public string Name
     {
-       get { return _roomName; }
-       set { this._roomName = value; }
+      get { return _roomName; }
+      set { _roomName = value; }
     }
+
     public string Description
     {
-        get { return _roomDescription; }
-        set { this._roomDescription = value; }
+      get { return _roomDescription; }
+      set { _roomDescription = value; }
     }
 
     #endregion
-    }
+  }
 }
