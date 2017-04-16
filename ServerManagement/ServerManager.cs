@@ -237,6 +237,21 @@ namespace ServerManagement
             SendCommandToClient(sender, new CommandContainer(CommandType.RoomDoesNotExists, null));
           }
           break;
+        case CommandType.RequestRoomArchive:
+          var roomRequestHistory = (RoomContainer)e.Command.Data;
+          var roomArchive = _messagesContainer.GetRoomArchive(roomRequestHistory);
+
+          if (roomArchive != null)
+          {
+            Console.WriteLine("Room archive sent to room {0} ", roomRequestHistory.Name);
+            SendCommandToClient(sender, new CommandContainer(CommandType.RoomArchive, roomArchive));
+          }
+          else
+          {
+            Console.WriteLine("Room {0} does not exists", roomRequestHistory.Name);
+            SendCommandToClient(sender, new CommandContainer(CommandType.RoomDoesNotExists, null));
+          }
+          break;
       }
     }
 
