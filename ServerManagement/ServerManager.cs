@@ -173,6 +173,24 @@ namespace ServerManagement
         case CommandType.RequestRoomList:
           SendCommandToAllClient(sender, new CommandContainer(CommandType.RoomList, _roomsContainer));
           break;
+        case CommandType.UserDisconnectedFromRoom:
+          var roomDisconnect = (RoomUsersContainer)e.Command.Data;  //receives a roomUsersContainer (room + user list)
+          if (_roomsContainer.RoomExist(roomDisconnect))            //if room exists
+          {
+            _roomsContainer.RemoveUserFromRoom(roomDisconnect);
+            foreach (string user in roomDisconnect.GetRoomUsersList())
+            {
+              Console.WriteLine("User {0} disconnect from room {1}", user, roomDisconnect.GetRoom().Name);
+            }
+            //SendCommandToClient(sender, new CommandContainer(CommandType.UserConnectedToRoom, null));
+            SendCommandToAllClient(sender, new CommandContainer(CommandType.RoomList, _roomsContainer));
+          }
+          else
+          {
+            Console.WriteLine("Room {0} does not exists", roomDisconnect.GetRoom().Name);
+            SendCommandToClient(sender, new CommandContainer(CommandType.RoomDoesNotExists, null));
+          }
+          break;
       }
     }
 

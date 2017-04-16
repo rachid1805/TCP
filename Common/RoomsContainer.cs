@@ -84,7 +84,28 @@ namespace Common
       }
         return false;
     }
-
+    //Search if user is in a specific room and removes him
+    public bool RemoveUserFromRoom(RoomUsersContainer room)
+    {
+      foreach (RoomUsersContainer theRoom in _rooms)
+      {
+        if (theRoom.GetRoom().Name.Equals(room.GetRoom().Name))
+          {
+            foreach (string user in theRoom.GetRoomUsersList())
+            {
+              foreach (string userRemove in room.GetRoomUsersList())
+              {
+                if (userRemove.Equals(user))
+                {
+                  theRoom.RemoveUser(user);
+                  return true;
+                }
+              }
+            }
+          }
+       }
+      return false;
+    }
     public IList<RoomUsersContainer> GetAllRooms()
     {
       return _rooms;

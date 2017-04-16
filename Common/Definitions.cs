@@ -74,6 +74,10 @@ namespace Common
     /// </summary>
     UserConnectedToRoom,
     /// <summary>
+    /// A client deconnects from the room
+    /// </summary>
+    UserDisconnectedFromRoom,
+    /// <summary>
     /// A client requests the list of all existing rooms
     /// </summary>
     RequestRoomList,
