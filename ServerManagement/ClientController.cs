@@ -16,6 +16,7 @@ namespace ServerManagement
     private string _clientName;
     private readonly BackgroundWorker _receiverThread;
     private readonly Semaphore _semaphore;
+    private bool _inLine;
 
     #region Constructor
 
@@ -85,7 +86,16 @@ namespace ServerManagement
       get { return _clientName; }
       set { _clientName = value; }
     }
-    
+
+    /// <summary>
+    /// The inline status of remote client.
+    /// </summary>
+    public bool InLine
+    {
+      get { return _inLine; }
+      set { _inLine = value; }
+    }
+
     #region Private Methods
 
     private void StartReceive(object sender, DoWorkEventArgs e)

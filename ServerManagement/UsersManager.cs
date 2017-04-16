@@ -87,6 +87,19 @@ namespace ServerManagement
       return false;
     }
 
+    public bool IsConnectedUser(string userId)
+    {
+      foreach (ProfileContainer profile in _profiles)
+      {
+        if (profile.UserName.Equals(userId) && profile.Connected)
+        {
+          return true;
+        }
+      }
+
+      return false;
+    }
+
     public UsersStatusContainer RegistredUsers
     {
       get

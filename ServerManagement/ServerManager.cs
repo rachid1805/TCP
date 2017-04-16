@@ -92,7 +92,6 @@ namespace ServerManagement
       ClientController clientController = new ClientController(socket);
       clientController.CommandReceived += new CommandReceivedEventHandler(CommandReceived);
       clientController.DisconnectedClient += new ClientDisconnectedEventHandler(ClientDisconnected);
-      //CheckForAbnormalDisconnection(clientController);
       _clients.Add(clientController);
       UpdateConsole("Opened.", clientController.IP, clientController.Port);
     }
@@ -101,6 +100,7 @@ namespace ServerManagement
     {
       // An incoming command needs to be processed.
 
+      var clientController = (ClientController)sender;
       switch (e.Command.CommandType)
       {
         case CommandType.ClientSignUp:
@@ -109,6 +109,7 @@ namespace ServerManagement
           if (registrationStatus == RegistrationStatus.Successful)
           {
             Console.WriteLine("New registred client {0}", newProfile.UserName);
+            _clients[IndexOfClient(clientController.IP, clientController.Port)].InLine = true;
             SendCommandToClient(sender, new CommandContainer(CommandType.ValidCredentials, null));
             SendCommandToAllClient(sender, new CommandContainer(CommandType.UsersConnectionStatus, new UsersStatusContainer(_usersManager.RegistredUsers.ClientsStatus)));
           }
@@ -122,10 +123,19 @@ namespace ServerManagement
           var profile = (ProfileContainer)e.Command.Data;
           if (_usersManager.IsRegistredUser(profile.UserName, profile.Password))
           {
-            _usersManager.UpdateUserStatus(profile.UserName, true);
-            Console.WriteLine("New connected client {0}", profile.UserName);
-            SendCommandToClient(sender, new CommandContainer(CommandType.ValidCredentials, null));
-            SendCommandToAllClient(sender, new CommandContainer(CommandType.UsersConnectionStatus, new UsersStatusContainer(_usersManager.RegistredUsers.ClientsStatus)));
+            if (!_usersManager.IsConnectedUser(profile.UserName))
+            {
+              _usersManager.UpdateUserStatus(profile.UserName, true);
+              _clients[IndexOfClient(clientController.IP, clientController.Port)].InLine = true;
+              Console.WriteLine("New connected client {0}", profile.UserName);
+              SendCommandToClient(sender, new CommandContainer(CommandType.ValidCredentials, null));
+              SendCommandToAllClient(sender, new CommandContainer(CommandType.UsersConnectionStatus, new UsersStatusContainer(_usersManager.RegistredUsers.ClientsStatus)));
+            }
+            else
+            {
+              Console.WriteLine("Already connected client {0}", profile.UserName);
+              SendCommandToClient(sender, new CommandContainer(CommandType.UserAlreadyConnected, null));
+            }
           }
           else
           {
@@ -196,24 +206,7 @@ namespace ServerManagement
 
     private void ClientDisconnected(object sender, ClientEventArgs e)
     {
-      string name = _clients[IndexOfClient(e.IP, e.Port)].ClientName;
-      if (RemoveClientManager(e.IP, e.Port))
-      {
-        UpdateConsole("Closed.", e.IP, e.Port);
-        _roomsContainer.RemoveUser(name);
-        SendCommandToAllClient(this, new CommandContainer(CommandType.RoomList, _roomsContainer));
-      }
-    }
-
-    private void CheckForAbnormalDisconnection(ClientController client)
-    {
-      string name = _clients[IndexOfClient(client.IP, client.Port)].ClientName;
-      if (RemoveClientManager(client.IP, client.Port))
-      {
-        UpdateConsole("Closed.", client.IP, client.Port);
-        _roomsContainer.RemoveUser(name);
-        SendCommandToAllClient(this, new CommandContainer(CommandType.RoomList, _roomsContainer));
-      }
+      RemoveClientManager(e.IP, e.Port);
     }
 
     private bool RemoveClientManager(IPAddress ip, int port)
@@ -224,12 +217,19 @@ namespace ServerManagement
         if (index != -1)
         {
           string name = _clients[index].ClientName;
+          var alreadyConnected = _clients[index].InLine;
           _clients.RemoveAt(index);
+          UpdateConsole("Closed.", ip, port);
 
-          // Inform all connected clients that a client had been disconnected.
-          _usersManager.UpdateUserStatus(name, false);
-          SendCommandToAllClient(this, new CommandContainer(CommandType.UsersConnectionStatus, new UsersStatusContainer(_usersManager.RegistredUsers.ClientsStatus)));
-          return true;
+          if (alreadyConnected)
+          {
+            // Inform all connected clients that a client had been disconnected.
+            _usersManager.UpdateUserStatus(name, false);
+            _roomsContainer.RemoveUser(name);
+            SendCommandToAllClient(this, new CommandContainer(CommandType.UsersConnectionStatus, new UsersStatusContainer(_usersManager.RegistredUsers.ClientsStatus)));
+            SendCommandToAllClient(this, new CommandContainer(CommandType.RoomList, _roomsContainer));
+            return true;
+          }
         }
         return false;
       }
@@ -251,9 +251,10 @@ namespace ServerManagement
 
     private void SendCommandToClient(object sender, CommandContainer command)
     {
+      var castSender = (ClientController)sender;
       foreach (ClientController client in _clients)
       {
-        if (client.ClientName.Equals(((ClientController)sender).ClientName))
+        if (client.IP.Equals(castSender.IP) && client.Port.Equals(castSender.Port))
         {
           client.SendCommand(command);
           return;

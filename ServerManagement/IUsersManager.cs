@@ -34,6 +34,11 @@ namespace ServerManagement
     bool IsRegistredUser(string userId, string password);
 
     /// <summary>
+    /// Return true if the specified user is already connected in the server
+    /// </summary>
+    bool IsConnectedUser(string userId);
+
+    /// <summary>
     /// Return all registred users and their status (connected or not)
     /// </summary>
     UsersStatusContainer RegistredUsers { get; }
