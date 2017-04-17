@@ -548,7 +548,7 @@ namespace ClientManagement
 
         return true;
       }
-      catch (Exception ex)
+      catch (Exception)
       {
         _semaphore.Release();
         return false;

@@ -141,7 +141,7 @@
     <EmbeddedResource Include="SoundResources\Pow.wav" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Graphics\face.gif" />
+    <EmbeddedResource Include="Graphics\chat.gif" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Graphics\arrow.gif" />
@@ -174,9 +174,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Images\ChatConnect.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Images\Delete.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Images\Like.png" />
