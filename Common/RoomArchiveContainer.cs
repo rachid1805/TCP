@@ -37,13 +37,21 @@ namespace Common
 
     public bool RemoveMessage(MessageContainer message)
     {
-      foreach (MessageContainer msg in _archive)
+      int indexToRemove = 0;
+
+      for (var index = 0; index < _archive.Count; index++)
       {
-        if (msg.Equals(message))
+        if (_archive[index].Msg.Equals(message.Msg))
         {
-          _archive.Remove(message);
-          return true;
+          indexToRemove = index;
+          break;
         }
+      }
+
+      if (indexToRemove != 0)
+      {
+        _archive.RemoveAt(indexToRemove);
+        return true;
       }
       return false;
     }

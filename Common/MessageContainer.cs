@@ -10,12 +10,18 @@ namespace Common
   {
     #region Constructor
 
-    public MessageContainer(string userName, RoomContainer room, string msg, int msgId)
+    public MessageContainer(string userName, RoomContainer room, string msg)
     {
       User = userName;
       Room = room;
       Msg = msg;
-      MsgId = msgId;
+    }
+
+    public MessageContainer(MessageContainer message)
+    {
+      User = message.User;
+      Room = new RoomContainer(message.Room.Name, message.Room.Description);
+      Msg = message.Msg;
     }
 
     #endregion
@@ -25,17 +31,6 @@ namespace Common
     public string User { get; set; }
     public RoomContainer Room { get; set; }
     public string Msg { get; set; }
-    public int MsgId { get; set; }
-
-    #endregion
-
-    #region Object
-
-    public override bool Equals(object obj)
-    {
-      // TODO
-      return base.Equals(obj);
-    }
 
     #endregion
   }

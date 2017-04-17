@@ -22,6 +22,14 @@ namespace Common
     /// </summary>
     Message,
     /// <summary>
+    /// Delete a text message
+    /// </summary>
+    RemoveMessage,
+    /// <summary>
+    /// Like a text message
+    /// </summary>
+    LikeMessage,
+    /// <summary>
     /// A registration of a new client
     /// </summary>
     ClientSignUp,
@@ -29,6 +37,10 @@ namespace Common
     /// A client login in the server
     /// </summary>
     ClientLogIn,
+    /// <summary>
+    /// A client logoff from the server
+    /// </summary>
+    ClientLogOff,
     /// <summary>
     /// A failure registration of an existing user name
     /// </summary>
