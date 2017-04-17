@@ -6,7 +6,7 @@ using System.Text;
 
 namespace ServerManagement
 {
-  class MessagesContainer : IMessagesManager
+  class MessagesContainer
   {
     private readonly List<RoomArchiveContainer> _roomsArchive;
 
