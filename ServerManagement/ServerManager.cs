@@ -25,7 +25,6 @@ namespace ServerManagement
       _roomsContainer = new RoomsContainer();
       _messagesContainer = new MessagesContainer();
 
-
       // Establish the local endpoint for the socket
       IPHostEntry ipHostEntry = Dns.GetHostEntry(hostNameOrAddress);
       IPAddress[] ipv4Addresses = Array.FindAll(ipHostEntry.AddressList, a => a.AddressFamily == AddressFamily.InterNetwork);
@@ -107,150 +106,47 @@ namespace ServerManagement
       switch (e.Command.CommandType)
       {
         case CommandType.ClientSignUp:
-          var newProfile = (ProfileContainer)e.Command.Data;
-          var registrationStatus = _usersManager.RegisterNewUser(newProfile);
-          if (registrationStatus == RegistrationStatus.Successful)
-          {
-            Console.WriteLine("New registred client {0}", newProfile.UserName);
-            _clients[IndexOfClient(clientController.IP, clientController.Port)].InLine = true;
-            SendCommandToClient(sender, new CommandContainer(CommandType.ValidCredentials, null));
-            SendCommandToAllClient(sender, new CommandContainer(CommandType.UsersConnectionStatus, new UsersStatusContainer(_usersManager.RegistredUsers.ClientsStatus)));
-          }
-          else
-          {
-            Console.WriteLine("Already registred client {0}", newProfile.UserName);
-            SendCommandToClient(sender, new CommandContainer(CommandType.UserAlreadyExists, null));
-          }
+          SignUp(clientController, (ProfileContainer)e.Command.Data);
           break;
+
         case CommandType.ClientLogIn:
-          var profile = (ProfileContainer)e.Command.Data;
-          if (_usersManager.IsRegistredUser(profile.UserName, profile.Password))
-          {
-            if (!_usersManager.IsConnectedUser(profile.UserName))
-            {
-              _usersManager.UpdateUserStatus(profile.UserName, true);
-              _clients[IndexOfClient(clientController.IP, clientController.Port)].InLine = true;
-              Console.WriteLine("New connected client {0}", profile.UserName);
-              SendCommandToClient(sender, new CommandContainer(CommandType.ValidCredentials, null));
-              SendCommandToAllClient(sender, new CommandContainer(CommandType.UsersConnectionStatus, new UsersStatusContainer(_usersManager.RegistredUsers.ClientsStatus)));
-            }
-            else
-            {
-              Console.WriteLine("Already connected client {0}", profile.UserName);
-              SendCommandToClient(sender, new CommandContainer(CommandType.UserAlreadyConnected, null));
-            }
-          }
-          else
-          {
-            Console.WriteLine("Connection of client {0} refused", profile.UserName);
-            SendCommandToClient(sender, new CommandContainer(CommandType.InvalidCredentials, null));
-          }
+          Login(clientController, (ProfileContainer)e.Command.Data);
           break;
+
+        case CommandType.ClientLogOff:
+          Logoff((ProfileContainer)e.Command.Data);
+          break;
+
         case CommandType.RequestClientList:
           SendCommandToClient(sender, new CommandContainer(CommandType.UsersConnectionStatus, new UsersStatusContainer(_usersManager.RegistredUsers.ClientsStatus)));
           break;
+
         case CommandType.CreateRoom:
-          var newRoom = (RoomContainer)e.Command.Data;
-          var newRoomUsers = new RoomUsersContainer(newRoom);  //wrap room in a RoomUsersContainer object. List of users is empty
-          if (!_roomsContainer.RoomExist(newRoomUsers))         //if room does not exist
-          {
-            _roomsContainer.AddRoom(newRoomUsers);
-            _messagesContainer.AddRoomArchive(new RoomArchiveContainer(newRoom));
-            Console.WriteLine("New room created {0}", newRoomUsers.GetRoom().Name);
-            SendCommandToClient(sender, new CommandContainer(CommandType.RoomCreated, null));
-            SendCommandToAllClient(sender, new CommandContainer(CommandType.RoomList, _roomsContainer));
-          }
-          else
-          {
-            Console.WriteLine("Room {0} already exists", newRoomUsers.GetRoom().Name);
-            SendCommandToClient(sender, new CommandContainer(CommandType.RoomAlreadyExists, null));
-          }
+          CreateRoom(clientController, (RoomContainer)e.Command.Data);
           break;
+
         case CommandType.ConnectToRoom:
-          var roomConnect = (RoomUsersContainer)e.Command.Data;  //receives a roomUsersContainer (room + user list)
-          if (_roomsContainer.RoomExist(roomConnect))            //if room exists
-          {
-            _roomsContainer.AddUsers(roomConnect);
-            foreach (string user in roomConnect.GetRoomUsersList())
-            {
-              Console.WriteLine("User {0} added to room {1}", user, roomConnect.GetRoom().Name);
-            }
-            //SendCommandToClient(sender, new CommandContainer(CommandType.UserConnectedToRoom, null));
-            SendCommandToAllClient(sender, new CommandContainer(CommandType.RoomList, _roomsContainer));
-          }
-          else
-          {
-            Console.WriteLine("Room {0} does not exists", roomConnect.GetRoom().Name);
-            SendCommandToClient(sender, new CommandContainer(CommandType.RoomDoesNotExists, null));
-          }
+          ConnectToRoom(clientController, (RoomUsersContainer)e.Command.Data);
           break;
+
         case CommandType.RequestRoomList:
-          SendCommandToAllClient(sender, new CommandContainer(CommandType.RoomList, _roomsContainer));
+          SendCommandToAllClients(sender, new CommandContainer(CommandType.RoomList, _roomsContainer));
           break;
+
         case CommandType.UserDisconnectedFromRoom:
-          var roomDisconnect = (RoomUsersContainer)e.Command.Data;  //receives a roomUsersContainer (room + user list)
-          if (_roomsContainer.RoomExist(roomDisconnect))            //if room exists
-          {
-            _roomsContainer.RemoveUserFromRoom(roomDisconnect);
-            foreach (string user in roomDisconnect.GetRoomUsersList())
-            {
-              Console.WriteLine("User {0} disconnect from room {1}", user, roomDisconnect.GetRoom().Name);
-            }
-            //SendCommandToClient(sender, new CommandContainer(CommandType.UserConnectedToRoom, null));
-            SendCommandToAllClient(sender, new CommandContainer(CommandType.RoomList, _roomsContainer));
-          }
-          else
-          {
-            Console.WriteLine("Room {0} does not exists", roomDisconnect.GetRoom().Name);
-            SendCommandToClient(sender, new CommandContainer(CommandType.RoomDoesNotExists, null));
-          }
+          DisconnectFromRoom(clientController, (RoomUsersContainer)e.Command.Data);
           break;
-        case CommandType.Message:
-          var message = (MessageContainer)e.Command.Data;
 
-          if (_messagesContainer.AddNewMessage(message))
-          {
-            Console.WriteLine("Message sent to room {0}", message.Room.Name);
-            foreach (RoomUsersContainer roomUser in _roomsContainer.GetAllRooms())
-            {
-              if (roomUser.GetRoom().Name.Equals(message.Room.Name))
-              {
-                foreach (string user in roomUser.GetRoomUsersList())
-                {
-                  foreach (ClientController client in _clients)
-                  {
-                    if (client.ClientName.Equals(user)) //user is is message room
-                    {
-                      if (!client.ClientName.Equals(message.User)) //don't send to user that created the message
-                      {
-                        SendCommandToClient(client, new CommandContainer(CommandType.Message, message));
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-          else
-          {
-            Console.WriteLine("Room {0} does not exists", message.Room.Name);
-            SendCommandToClient(sender, new CommandContainer(CommandType.RoomDoesNotExists, null));
-          }
-          break;
         case CommandType.RequestRoomArchive:
-          var roomRequestHistory = (RoomContainer)e.Command.Data;
-          var roomArchive = _messagesContainer.GetRoomArchive(roomRequestHistory);
+          SendRoomArchive(clientController, (RoomContainer)e.Command.Data);
+          break;
 
-          if (roomArchive != null)
-          {
-            Console.WriteLine("Room archive sent to room {0} ", roomRequestHistory.Name);
-            SendCommandToClient(sender, new CommandContainer(CommandType.RoomArchive, roomArchive));
-          }
-          else
-          {
-            Console.WriteLine("Room {0} does not exists", roomRequestHistory.Name);
-            SendCommandToClient(sender, new CommandContainer(CommandType.RoomDoesNotExists, null));
-          }
+        case CommandType.Message:
+          ReceiveMessage(clientController, (MessageContainer)e.Command.Data);
+          break;
+
+        case CommandType.RemoveMessage:
+          RemoveMessage(clientController, (MessageContainer)e.Command.Data);
           break;
       }
     }
@@ -277,8 +173,8 @@ namespace ServerManagement
             // Inform all connected clients that a client had been disconnected.
             _usersManager.UpdateUserStatus(name, false);
             _roomsContainer.RemoveUser(name);
-            SendCommandToAllClient(this, new CommandContainer(CommandType.UsersConnectionStatus, new UsersStatusContainer(_usersManager.RegistredUsers.ClientsStatus)));
-            SendCommandToAllClient(this, new CommandContainer(CommandType.RoomList, _roomsContainer));
+            SendCommandToAllClients(this, new CommandContainer(CommandType.UsersConnectionStatus, new UsersStatusContainer(_usersManager.RegistredUsers.ClientsStatus)));
+            SendCommandToAllClients(this, new CommandContainer(CommandType.RoomList, _roomsContainer));
             return true;
           }
         }
@@ -313,7 +209,7 @@ namespace ServerManagement
       }
     }
 
-    private void SendCommandToAllClient(object sender, CommandContainer command)
+    private void SendCommandToAllClients(object sender, CommandContainer command)
     {
       foreach (ClientController client in _clients)
       {
@@ -325,6 +221,184 @@ namespace ServerManagement
     {
       Console.WriteLine("Channel {0}{1}{2} has been {3} ( {4}|{5} )", IP.ToString(), ":", port.ToString(), status,
         DateTime.Now.ToShortDateString(), DateTime.Now.ToLongTimeString());
+    }
+
+    private void SignUp(ClientController clientController, ProfileContainer newProfile)
+    {
+      var registrationStatus = _usersManager.RegisterNewUser(newProfile);
+      if (registrationStatus == RegistrationStatus.Successful)
+      {
+        Console.WriteLine("New registred client {0}", newProfile.UserName);
+        _clients[IndexOfClient(clientController.IP, clientController.Port)].InLine = true;
+        SendCommandToClient(clientController, new CommandContainer(CommandType.ValidCredentials, null));
+        SendCommandToAllClients(clientController, new CommandContainer(CommandType.UsersConnectionStatus, new UsersStatusContainer(_usersManager.RegistredUsers.ClientsStatus)));
+        SendCommandToAllClients(clientController, new CommandContainer(CommandType.RoomList, _roomsContainer));
+      }
+      else
+      {
+        Console.WriteLine("Already registred client {0}", newProfile.UserName);
+        SendCommandToClient(clientController, new CommandContainer(CommandType.UserAlreadyExists, null));
+      }
+    }
+
+    private void Login(ClientController clientController, ProfileContainer profile)
+    {
+      if (_usersManager.IsRegistredUser(profile.UserName, profile.Password))
+      {
+        if (!_usersManager.IsConnectedUser(profile.UserName))
+        {
+          _usersManager.UpdateUserStatus(profile.UserName, true);
+          _clients[IndexOfClient(clientController.IP, clientController.Port)].InLine = true;
+          Console.WriteLine("Client {0} has been connected", profile.UserName);
+          SendCommandToClient(clientController, new CommandContainer(CommandType.ValidCredentials, null));
+          SendCommandToAllClients(clientController, new CommandContainer(CommandType.UsersConnectionStatus, new UsersStatusContainer(_usersManager.RegistredUsers.ClientsStatus)));
+          SendCommandToAllClients(clientController, new CommandContainer(CommandType.RoomList, _roomsContainer));
+        }
+        else
+        {
+          Console.WriteLine("Already connected client {0}", profile.UserName);
+          SendCommandToClient(clientController, new CommandContainer(CommandType.UserAlreadyConnected, null));
+        }
+      }
+      else
+      {
+        Console.WriteLine("Connection of client {0} refused", profile.UserName);
+        SendCommandToClient(clientController, new CommandContainer(CommandType.InvalidCredentials, null));
+      }
+    }
+
+    private void Logoff(ProfileContainer profile)
+    {
+      if (_usersManager.IsRegistredUser(profile.UserName, profile.Password))
+      {
+        if (_usersManager.IsConnectedUser(profile.UserName))
+        {
+          Console.WriteLine("Client {0} has been disconnected", profile.UserName);
+        }
+        else
+        {
+          Console.WriteLine("Client {0} has not been connected before", profile.UserName);
+        }
+      }
+      else
+      {
+        Console.WriteLine("Disonnection of client {0} refused", profile.UserName);
+      }
+    }
+
+    private void CreateRoom(ClientController clientController, RoomContainer newRoom)
+    {
+      var newRoomUsers = new RoomUsersContainer(newRoom);
+      if (!_roomsContainer.RoomExist(newRoomUsers))
+      {
+        _roomsContainer.AddRoom(newRoomUsers);
+        _messagesContainer.AddRoomArchive(new RoomArchiveContainer(newRoom));
+        Console.WriteLine("New room created {0}", newRoomUsers.GetRoom().Name);
+        SendCommandToClient(clientController, new CommandContainer(CommandType.RoomCreated, null));
+        SendCommandToAllClients(clientController, new CommandContainer(CommandType.RoomList, _roomsContainer));
+      }
+      else
+      {
+        Console.WriteLine("Room {0} already exists", newRoomUsers.GetRoom().Name);
+        SendCommandToClient(clientController, new CommandContainer(CommandType.RoomAlreadyExists, null));
+      }
+    }
+
+    private void ConnectToRoom(ClientController clientController, RoomUsersContainer roomConnect)
+    {
+      if (_roomsContainer.RoomExist(roomConnect))
+      {
+        _roomsContainer.AddUsers(roomConnect);
+        foreach (string user in roomConnect.GetRoomUsersList())
+        {
+          Console.WriteLine("User {0} added to room {1}", user, roomConnect.GetRoom().Name);
+        }
+        SendCommandToAllClients(clientController, new CommandContainer(CommandType.RoomList, _roomsContainer));
+      }
+      else
+      {
+        Console.WriteLine("Room {0} does not exists", roomConnect.GetRoom().Name);
+        SendCommandToClient(clientController, new CommandContainer(CommandType.RoomDoesNotExists, null));
+      }
+    }
+
+    private void DisconnectFromRoom(ClientController clientController, RoomUsersContainer roomDisconnect)
+    {
+      if (_roomsContainer.RoomExist(roomDisconnect))
+      {
+        _roomsContainer.RemoveUserFromRoom(roomDisconnect);
+        foreach (string user in roomDisconnect.GetRoomUsersList())
+        {
+          Console.WriteLine("User {0} disconnect from room {1}", user, roomDisconnect.GetRoom().Name);
+        }
+        SendCommandToAllClients(clientController, new CommandContainer(CommandType.RoomList, _roomsContainer));
+      }
+      else
+      {
+        Console.WriteLine("Room {0} does not exists", roomDisconnect.GetRoom().Name);
+        SendCommandToClient(clientController, new CommandContainer(CommandType.RoomDoesNotExists, null));
+      }
+    }
+
+    private void SendRoomArchive(ClientController clientController, RoomContainer roomRequestHistory)
+    {
+      var roomArchive = _messagesContainer.GetRoomArchive(roomRequestHistory);
+
+      if (roomArchive != null)
+      {
+        Console.WriteLine("Room archive sent to room {0} ", roomRequestHistory.Name);
+        SendCommandToClient(clientController, new CommandContainer(CommandType.RoomArchive, roomArchive));
+      }
+      else
+      {
+        Console.WriteLine("Room {0} does not exists", roomRequestHistory.Name);
+        SendCommandToClient(clientController, new CommandContainer(CommandType.RoomDoesNotExists, null));
+      }
+    }
+
+    private void ReceiveMessage(ClientController clientController, MessageContainer message)
+    {
+      if (_messagesContainer.AddNewMessage(message))
+      {
+        Console.WriteLine("Message sent to room {0}", message.Room.Name);
+        foreach (RoomUsersContainer roomUser in _roomsContainer.GetAllRooms())
+        {
+          if (roomUser.GetRoom().Name.Equals(message.Room.Name))
+          {
+            foreach (string user in roomUser.GetRoomUsersList())
+            {
+              foreach (ClientController client in _clients)
+              {
+                if (client.ClientName.Equals(user)) //user is is message room
+                {
+                  if (!client.ClientName.Equals(message.User)) //don't send to user that created the message
+                  {
+                    SendCommandToClient(client, new CommandContainer(CommandType.Message, message));
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      else
+      {
+        Console.WriteLine("Room {0} does not exists", message.Room.Name);
+        SendCommandToClient(clientController, new CommandContainer(CommandType.RoomDoesNotExists, null));
+      }
+    }
+
+    private void RemoveMessage(ClientController clientController, MessageContainer message)
+    {
+      if (_messagesContainer.RemoveMessage(message))
+      {
+        Console.WriteLine("Removed {0} message from room {1}", message.User, message.Room.Name);
+        SendCommandToAllClients(clientController, new CommandContainer(CommandType.RemoveMessage, new MessageContainer(message)));
+      }
+      else
+      {
+        Console.WriteLine("{0} message from room {1} not found", message.User, message.Room.Name);
+      }
     }
 
     #endregion
