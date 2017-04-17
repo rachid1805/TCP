@@ -73,7 +73,22 @@ namespace ServerManagement
       }
       return false;
     }
-    
+
+    public bool LikeMessage(MessageContainer message)
+    {
+      foreach (RoomArchiveContainer roomArchive in _roomsArchive)
+      {
+        if (roomArchive.GetRoom().Name.Equals(message.Room.Name))
+        {
+          if (roomArchive.LikeMessage(message))
+          {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
     public RoomArchiveContainer GetRoomArchive(RoomContainer room)
     {
       foreach (RoomArchiveContainer roomArchive in _roomsArchive)

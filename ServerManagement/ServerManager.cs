@@ -148,6 +148,10 @@ namespace ServerManagement
         case CommandType.RemoveMessage:
           RemoveMessage(clientController, (MessageContainer)e.Command.Data);
           break;
+
+        case CommandType.LikeMessage:
+          LikeMessage(clientController, (MessageContainer)e.Command.Data);
+          break;
       }
     }
 
@@ -397,7 +401,20 @@ namespace ServerManagement
       }
       else
       {
-        Console.WriteLine("{0} message from room {1} not found", message.User, message.Room.Name);
+        Console.WriteLine("Can't remove {0} message from room {1}", message.User, message.Room.Name);
+      }
+    }
+
+    private void LikeMessage(ClientController clientController, MessageContainer message)
+    {
+      if (_messagesContainer.LikeMessage(message))
+      {
+        Console.WriteLine("Liked {0} message from room {1}", message.User, message.Room.Name);
+        SendCommandToAllClients(clientController, new CommandContainer(CommandType.LikeMessage, new MessageContainer(message)));
+      }
+      else
+      {
+        Console.WriteLine("Can't like {0} message from room {1}", message.User, message.Room.Name);
       }
     }
 
