@@ -22,6 +22,7 @@ namespace Common
       User = message.User;
       Room = new RoomContainer(message.Room.Name, message.Room.Description);
       Msg = message.Msg;
+      Likes = message.Likes;
     }
 
     #endregion
@@ -31,6 +32,16 @@ namespace Common
     public string User { get; set; }
     public RoomContainer Room { get; set; }
     public string Msg { get; set; }
+    public int Likes { get; private set; }
+
+    #endregion
+
+    #region Public
+
+    public void AddLike()
+    {
+      Likes++;
+    }
 
     #endregion
   }

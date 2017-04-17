@@ -56,6 +56,19 @@ namespace Common
       return false;
     }
 
+    public bool LikeMessage(MessageContainer message)
+    {
+      foreach (var messageContainer in _archive)
+      {
+        if (messageContainer.Msg.Equals(message.Msg))
+        {
+          messageContainer.AddLike();
+          return true;
+        }
+      }
+      return false;
+    }
+
     public RoomContainer GetRoom()
     {
       return _room;
