@@ -42,7 +42,7 @@ namespace Common
 
       for (index = 0; index < _archive.Count; index++)
       {
-        if (_archive[index].Msg.Equals(message.Msg))
+        if (_archive[index].Msg.Equals(message.Msg) && _archive[index].MsgId.Equals(message.MsgId))
         {
           found = true;
           break;
@@ -61,7 +61,7 @@ namespace Common
     {
       foreach (var messageContainer in _archive)
       {
-        if (messageContainer.Msg.Equals(message.Msg))
+        if (messageContainer.Msg.Equals(message.Msg) && messageContainer.MsgId.Equals(message.MsgId))
         {
           messageContainer.AddLike();
           return true;
