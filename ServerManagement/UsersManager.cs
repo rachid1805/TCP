@@ -115,6 +115,19 @@ namespace ServerManagement
       }
     }
 
+    public ProfileContainer GetUserProfile(string userId)
+    {
+      foreach (ProfileContainer profile in _profiles)
+      {
+        if (profile.UserName.Equals(userId) && profile.Connected)
+        {
+          return profile;
+        }
+      }
+
+      return null;
+    }
+
     #endregion
   }
 }

@@ -42,5 +42,9 @@ namespace ServerManagement
     /// Return all registred users and their status (connected or not)
     /// </summary>
     UsersStatusContainer RegistredUsers { get; }
+    /// <summary>
+    /// Return user's profile
+    /// </summary>
+    ProfileContainer GetUserProfile(string userId);
   }
 }

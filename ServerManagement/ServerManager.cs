@@ -152,6 +152,10 @@ namespace ServerManagement
         case CommandType.LikeMessage:
           LikeMessage(clientController, (MessageContainer)e.Command.Data);
           break;
+
+        case CommandType.RequestUserProfile:
+          RequestUserProfile(clientController, (ProfileContainer)e.Command.Data);
+          break;
       }
     }
 
@@ -257,6 +261,8 @@ namespace ServerManagement
           SendCommandToClient(clientController, new CommandContainer(CommandType.ValidCredentials, null));
           SendCommandToAllClients(clientController, new CommandContainer(CommandType.UsersConnectionStatus, new UsersStatusContainer(_usersManager.RegistredUsers.ClientsStatus)));
           SendCommandToAllClients(clientController, new CommandContainer(CommandType.RoomList, _roomsContainer));
+          _usersManager.GetUserProfile(profile.UserName).LastConnected = DateTime.Now;
+         
         }
         else
         {
@@ -415,6 +421,24 @@ namespace ServerManagement
       else
       {
         Console.WriteLine("Can't like {0} message from room {1}", message.User, message.Room.Name);
+      }
+    }
+
+    private void RequestUserProfile(ClientController clientController, ProfileContainer profile)
+    {
+      if (_usersManager.IsRegistredUser(profile.UserName, profile.Password))
+      {
+        if (_usersManager.IsConnectedUser(profile.UserName))
+        {
+          ProfileContainer userProfile = _usersManager.GetUserProfile(profile.UserName);
+          Console.WriteLine("Profile for user {0} has been found", userProfile.UserName);
+          SendCommandToClient(clientController, new CommandContainer(CommandType.UserProfile, userProfile));      
+        }    
+      }
+      else
+      {
+        Console.WriteLine("Profile {0} does not exist ", profile.UserName);
+        //SendCommandToClient(clientController, new CommandContainer(CommandType.InvalidCredentials, null));
       }
     }
 

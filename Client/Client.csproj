@@ -66,6 +66,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ProfileFrm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ProfileFrm.Designer.cs">
+      <DependentUpon>ProfileFrm.cs</DependentUpon>
+    </Compile>
     <Compile Include="RoomFrm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -82,6 +88,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ShareUtils.cs" />
     <None Include="Images\InLine.png" />
+    <EmbeddedResource Include="ProfileFrm.resx">
+      <DependentUpon>ProfileFrm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="RoomFrm.resx">
       <DependentUpon>RoomFrm.cs</DependentUpon>
       <SubType>Designer</SubType>

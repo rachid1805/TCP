@@ -108,6 +108,14 @@ namespace Common
     /// <summary>
     /// The server sends the room archive
     /// </summary>
-    RoomArchive
+    RoomArchive,
+    /// <summary>
+    /// A client requests the user profile
+    /// </summary>
+    RequestUserProfile,
+    /// <summary>
+    /// The server sends the user profile
+    /// </summary>
+    UserProfile
   }
 }

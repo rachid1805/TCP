@@ -8,11 +8,15 @@ namespace Common
     private readonly string _user;
     private readonly string _password;
     private bool _connected;
+    private DateTime _dateJoined;
+    private DateTime _lastConnected;
 
     public ProfileContainer(string user, string password)
     {
       _user = user;
       _password = password;
+      _dateJoined = DateTime.Now;
+      _lastConnected = DateTime.Now;
     }
 
     public string UserName
@@ -29,6 +33,15 @@ namespace Common
     {
       get { return _connected; }
       set { _connected = value; }
+    }
+    public DateTime DateJoined
+    {
+      get { return _dateJoined; }
+    }
+    public DateTime LastConnected
+    {
+      get { return _lastConnected; }
+      set { _lastConnected = value; }
     }
   }
 }
