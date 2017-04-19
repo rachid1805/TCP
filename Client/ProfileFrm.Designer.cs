@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+      System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ProfileFrm));
       this.userName = new System.Windows.Forms.Label();
       this.dateJoinedLabel = new System.Windows.Forms.Label();
       this.lastConnectionLabel = new System.Windows.Forms.Label();
@@ -105,8 +106,11 @@
       this.Controls.Add(this.lastConnectionLabel);
       this.Controls.Add(this.dateJoinedLabel);
       this.Controls.Add(this.userName);
+      this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+      this.MaximizeBox = false;
       this.Name = "ProfileFrm";
       this.Text = "My Profile";
+      this.Load += new System.EventHandler(this.ProfileFrm_Load);
       this.ResumeLayout(false);
       this.PerformLayout();
 

@@ -25,5 +25,10 @@ namespace Client
     {
       this.Close();
     }
+
+    private void ProfileFrm_Load(object sender, EventArgs e)
+    {
+
+    }
   }
 }
